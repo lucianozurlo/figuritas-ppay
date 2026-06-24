@@ -72,15 +72,58 @@ function doPost(e) {
 }
 
 /**
- * doGet — responde al preflight OPTIONS y sirve el HTML
- * si se quiere hostear el form desde Apps Script en lugar de GitHub Pages.
- * Si el frontend vive en GitHub Pages, este doGet no se usa.
+ * doGet — dos usos:
+ *   ?action=check&mail=xxx  → polling del frontend para saber si la figurita está lista
+ *   sin parámetros          → health check: confirma que el Web App responde
  */
-function doGet() {
-  return HtmlService
-    .createHtmlOutputFromFile('index') // requiere index.html en el proyecto
-    .setTitle('Mi Figurita Personal Pay')
-    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+function doGet(e) {
+  const action = e && e.parameter && e.parameter.action;
+
+  if (action === 'check') {
+    const mail = e.parameter.mail || '';
+    return jsonResponse_(checkFiguritaLista_(mail));
+  }
+
+  return jsonResponse_({ status: 'ok', service: 'Figuritas API' });
+}
+
+/**
+ * Busca en el Sheet si el mail ya tiene figurita generada.
+ * Devuelve { status: 'ready', url: '...' } o { status: 'pending' }.
+ */
+function checkFiguritaLista_(mail) {
+  if (!mail) return { status: 'pending' };
+
+  try {
+    const sheet  = getSheet_();
+    const colMap = getColumnMap_(sheet);
+    const data   = sheet.getDataRange().getValues();
+
+    const mailNorm  = String(mail).trim().toLowerCase();
+    const colMail   = colMap[CONFIG.COLUMNS.mail];
+    const colEstado = colMap[CONFIG.COLUMNS.estado];
+    const colUrl    = colMap[CONFIG.COLUMNS.urlFiguraGenerada];
+
+    if (!colMail || !colEstado || !colUrl) return { status: 'pending' };
+
+    const row = data.slice(1).find(r => {
+      const rowMail   = String(r[colMail   - 1] || '').trim().toLowerCase();
+      const rowEstado = String(r[colEstado  - 1] || '').trim();
+      return rowMail === mailNorm &&
+        (rowEstado === 'FIGURITA_CREADA' || rowEstado === 'EMAIL_ENVIADO');
+    });
+
+    if (row) {
+      const url = String(row[colUrl - 1] || '').trim();
+      if (url) return { status: 'ready', url };
+    }
+
+    return { status: 'pending' };
+
+  } catch (err) {
+    Logger.log('[checkFiguritaLista_] ' + err.toString());
+    return { status: 'pending' };
+  }
 }
 
 

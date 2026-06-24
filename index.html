@@ -8,13 +8,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <title>Mi Figurita Personal Pay</title>
     <style>
-      /* ─── TOKENS ──────────────────────────────────────────── */
       :root {
         --c-bg: #F2F4F8;
         --c-surface: #FFFFFF;
         --c-brand: #0062FF;
         --c-brand-dk: #0047CC;
         --c-accent: #00C6A2;
+        --c-accent-dk: #00A886;
         --c-text: #111827;
         --c-muted: #6B7280;
         --c-border: #D1D5DB;
@@ -25,7 +25,6 @@
         --shadow: 0 2px 20px rgba(0, 0, 0, .07);
       }
 
-      /* ─── RESET ───────────────────────────────────────────── */
       *,
       *::before,
       *::after {
@@ -36,7 +35,6 @@
 
       html {
         scroll-behavior: smooth;
-        /* Previene zoom al enfocar inputs en iOS */
         -webkit-text-size-adjust: 100%;
       }
 
@@ -49,11 +47,10 @@
         flex-direction: column;
         align-items: center;
         padding: 20px 16px 60px;
-        /* Mejor rendering en retina */
         -webkit-font-smoothing: antialiased;
       }
 
-      /* ─── HEADER ──────────────────────────────────────────── */
+      /* ─── HEADER ─────────────────────────────────────────── */
       .header {
         text-align: center;
         margin-bottom: 20px;
@@ -74,7 +71,6 @@
         font-size: clamp(24px, 7vw, 32px);
         font-weight: 800;
         line-height: 1.15;
-        color: var(--c-text);
       }
 
       .header__title mark {
@@ -89,7 +85,7 @@
         line-height: 1.5;
       }
 
-      /* ─── CARD ────────────────────────────────────────────── */
+      /* ─── CARD ───────────────────────────────────────────── */
       .card {
         background: var(--c-surface);
         border-radius: var(--radius);
@@ -99,22 +95,21 @@
         max-width: 460px;
       }
 
-      /* ─── FOTO: SECCIÓN ───────────────────────────────────── */
+      /* ─── FOTO ───────────────────────────────────────────── */
       .foto-section {
         margin-bottom: 24px;
       }
 
       .foto-section__label {
+        display: block;
         font-size: 11px;
         font-weight: 700;
         letter-spacing: .08em;
         text-transform: uppercase;
         color: var(--c-muted);
         margin-bottom: 10px;
-        display: block;
       }
 
-      /* Preview: cuadrado centrado, máximo 240px, nunca más que el ancho */
       .foto-preview {
         position: relative;
         width: 100%;
@@ -132,7 +127,6 @@
         border-color: var(--c-accent);
       }
 
-      /* Canvas ocupa todo el contenedor — el JS hace crop 1:1 */
       .foto-preview__canvas {
         position: absolute;
         inset: 0;
@@ -145,7 +139,6 @@
         display: block;
       }
 
-      /* Placeholder visible cuando no hay foto */
       .foto-preview__empty {
         position: absolute;
         inset: 0;
@@ -184,7 +177,6 @@
         line-height: 1.4;
       }
 
-      /* Botones de foto: dos botones grandes debajo del preview */
       .foto-btns {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -196,7 +188,6 @@
         align-items: center;
         justify-content: center;
         gap: 7px;
-        /* Área táctil mínima Apple HIG: 44px */
         min-height: 48px;
         padding: 12px 8px;
         border-radius: var(--radius-sm);
@@ -206,10 +197,10 @@
         font-weight: 600;
         color: var(--c-text);
         cursor: pointer;
-        /* Quitar highlight azul en iOS */
         -webkit-tap-highlight-color: transparent;
         user-select: none;
-        transition: background 0.12s, border-color 0.12s;
+        transition: background .12s, border-color .12s;
+        font-family: inherit;
       }
 
       .foto-btn:active {
@@ -223,7 +214,6 @@
         flex-shrink: 0;
       }
 
-      /* Botón de "cambiar foto" que aparece cuando ya hay foto */
       .foto-btn--change {
         grid-column: 1 / -1;
         border-color: var(--c-accent);
@@ -236,7 +226,6 @@
         display: flex;
       }
 
-      /* Cuando hay foto, los botones de cámara/galería pasan a ser secundarios */
       .foto-preview.has-photo~.foto-btns .foto-btn:not(.foto-btn--change) {
         font-size: 13px;
         min-height: 40px;
@@ -244,7 +233,6 @@
         color: var(--c-muted);
       }
 
-      /* Error de foto */
       .foto-error {
         display: none;
         margin-top: 8px;
@@ -257,13 +245,12 @@
         display: block;
       }
 
-      /* Inputs de archivo reales — invisibles */
       #inputCamera,
       #inputGallery {
         display: none;
       }
 
-      /* ─── CAMPOS ──────────────────────────────────────────── */
+      /* ─── CAMPOS ─────────────────────────────────────────── */
       .field {
         margin-bottom: 16px;
       }
@@ -281,7 +268,6 @@
       .field__input,
       .field__select {
         width: 100%;
-        /* ≥16px previene zoom automático en iOS Safari */
         font-size: 16px;
         padding: 14px 16px;
         border-radius: var(--radius-sm);
@@ -289,11 +275,9 @@
         background: var(--c-surface);
         color: var(--c-text);
         outline: none;
-        /* Quitar estilos nativos en iOS */
         -webkit-appearance: none;
         appearance: none;
         transition: border-color .15s;
-        /* Fuente heredada explícita (iOS no la hereda por defecto) */
         font-family: inherit;
       }
 
@@ -306,7 +290,6 @@
         color: #9CA3AF;
       }
 
-      /* Char counter */
       .field__footer {
         display: flex;
         justify-content: space-between;
@@ -342,7 +325,6 @@
         margin-top: 5px;
       }
 
-      /* Estado de error */
       .field.is-error .field__input,
       .field.is-error .field__select {
         border-color: var(--c-error);
@@ -353,7 +335,6 @@
         display: block;
       }
 
-      /* Flecha del select */
       .field__select-wrap {
         position: relative;
       }
@@ -370,16 +351,15 @@
         border-top: 6px solid var(--c-muted);
       }
 
-      /* ─── DIVIDER ─────────────────────────────────────────── */
+      /* ─── DIVIDER ────────────────────────────────────────── */
       .divider {
         border: none;
         border-top: 1px solid var(--c-border);
         margin: 20px 0;
       }
 
-      /* ─── CONSENTIMIENTO ──────────────────────────────────── */
+      /* ─── CONSENTIMIENTO ─────────────────────────────────── */
       .consent-block {
-        /* label wrappea todo para hacer toda el área tappeable */
         display: flex;
         gap: 14px;
         align-items: flex-start;
@@ -408,7 +388,6 @@
         background: var(--c-error-bg);
       }
 
-      /* Checkbox: mínimo 24px para mobile */
       .consent-block input[type="checkbox"] {
         width: 24px;
         height: 24px;
@@ -454,11 +433,10 @@
         color: #065F46;
       }
 
-      /* ─── SUBMIT ──────────────────────────────────────────── */
+      /* ─── SUBMIT ─────────────────────────────────────────── */
       .btn-submit {
         display: block;
         width: 100%;
-        /* Área táctil cómoda en mobile */
         min-height: 54px;
         padding: 16px;
         margin-top: 20px;
@@ -485,7 +463,7 @@
         cursor: not-allowed;
       }
 
-      /* ─── BARRA DE PROGRESO ───────────────────────────────── */
+      /* ─── PROGRESO ───────────────────────────────────────── */
       .progress {
         display: none;
         margin-top: 16px;
@@ -518,7 +496,7 @@
         text-align: center;
       }
 
-      /* ─── ERROR BANNER ────────────────────────────────────── */
+      /* ─── ERROR BANNER ───────────────────────────────────── */
       .error-banner {
         display: none;
         margin-top: 14px;
@@ -535,47 +513,212 @@
         display: block;
       }
 
-      /* ─── PANTALLA DE ÉXITO ───────────────────────────────── */
+      /* ─── PANTALLA DE ÉXITO ──────────────────────────────── */
       .success-screen {
         display: none;
         flex-direction: column;
         align-items: center;
         text-align: center;
-        gap: 14px;
-        padding: 16px 0;
+        gap: 0;
       }
 
       .success-screen.visible {
         display: flex;
       }
 
-      .success-screen__icon {
-        width: 72px;
-        height: 72px;
+      /* Spinner de espera */
+      .waiting-block {
+        padding: 24px 0 8px;
+        width: 100%;
+      }
+
+      .waiting-block.hidden {
+        display: none;
+      }
+
+      .spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid var(--c-border);
+        border-top-color: var(--c-brand);
+        border-radius: 50%;
+        animation: spin .8s linear infinite;
+        margin: 0 auto 16px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .waiting-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      .waiting-sub {
+        font-size: 14px;
+        color: var(--c-muted);
+        line-height: 1.5;
+      }
+
+      .poll-dots {
+        display: inline-flex;
+        gap: 4px;
+        margin-top: 16px;
+      }
+
+      .poll-dots span {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--c-border);
+        animation: pulse 1.2s ease-in-out infinite;
+      }
+
+      .poll-dots span:nth-child(2) {
+        animation-delay: .2s;
+      }
+
+      .poll-dots span:nth-child(3) {
+        animation-delay: .4s;
+      }
+
+      @keyframes pulse {
+
+        0%,
+        100% {
+          background: var(--c-border);
+          transform: scale(1);
+        }
+
+        50% {
+          background: var(--c-brand);
+          transform: scale(1.3);
+        }
+      }
+
+      /* Figurita lista */
+      .figurita-block {
+        width: 100%;
+        padding-top: 8px;
+      }
+
+      .figurita-block.hidden {
+        display: none;
+      }
+
+      .figurita-block__check {
+        width: 64px;
+        height: 64px;
         border-radius: 50%;
         background: var(--c-accent);
         display: flex;
         align-items: center;
         justify-content: center;
+        margin: 0 auto 14px;
       }
 
-      .success-screen__icon svg {
-        width: 36px;
-        height: 36px;
+      .figurita-block__check svg {
+        width: 32px;
+        height: 32px;
         fill: #fff;
       }
 
-      .success-screen__title {
-        font-size: 24px;
+      .figurita-block__title {
+        font-size: 22px;
         font-weight: 800;
-        color: var(--c-text);
+        margin-bottom: 4px;
       }
 
-      .success-screen__body {
-        font-size: 15px;
+      .figurita-block__sub {
+        font-size: 14px;
         color: var(--c-muted);
-        line-height: 1.65;
-        max-width: 320px;
+        margin-bottom: 20px;
+        line-height: 1.5;
+      }
+
+      /* Imagen de la figurita generada */
+      .figurita-img-wrap {
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto 24px;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .12);
+        background: var(--c-bg);
+        aspect-ratio: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .figurita-img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      /* Botones de acción */
+      .action-btns {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 52px;
+        padding: 14px 20px;
+        border-radius: var(--radius-sm);
+        border: none;
+        font-size: 16px;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        text-decoration: none;
+        -webkit-tap-highlight-color: transparent;
+        transition: opacity .12s;
+      }
+
+      .action-btn:active {
+        opacity: .85;
+      }
+
+      .action-btn svg {
+        width: 22px;
+        height: 22px;
+        flex-shrink: 0;
+      }
+
+      .action-btn--download {
+        background: var(--c-brand);
+        color: #fff;
+      }
+
+      .action-btn--whatsapp {
+        background: #25D366;
+        color: #fff;
+      }
+
+      .action-btn--mail {
+        background: var(--c-surface);
+        color: var(--c-text);
+        border: 1.5px solid var(--c-border);
+      }
+
+      .success-footer {
+        margin-top: 20px;
+        font-size: 12px;
+        color: var(--c-muted);
+        line-height: 1.5;
+        padding-bottom: 4px;
       }
 
     </style>
@@ -584,25 +727,21 @@
   <body>
 
     <header class="header">
-      <p class="header__eyebrow">Personal Pay · All Hands 2025</p>
+      <p class="header__eyebrow">Personal Pay · All Hands 2026</p>
       <h1 class="header__title">Tu <mark>Figurita</mark><br>Personal Pay</h1>
-      <p class="header__sub">Completá tus datos, sacate una foto y listo. Tu figurita llega a tu correo antes de que
-        termine el día.</p>
+      <p class="header__sub">Completá tus datos, sacate una foto y listo. Tu figurita aparece en minutos.</p>
     </header>
 
-    <!-- inputs de archivo ocultos — fuera del card para evitar bubbling accidental -->
     <input type="file" id="inputCamera" accept="image/*" capture="user" />
     <input type="file" id="inputGallery" accept="image/*" />
 
     <div class="card" id="cardMain">
 
-      <!-- ── PANTALLA FORMULARIO ───────────────────────────── -->
+      <!-- ── FORMULARIO ──────────────────────────────────── -->
       <div id="screenForm">
 
-        <!-- FOTO -->
         <div class="foto-section">
           <span class="foto-section__label">Tu foto</span>
-
           <div class="foto-preview" id="fotoPreview">
             <canvas id="previewCanvas" class="foto-preview__canvas"></canvas>
             <div class="foto-preview__empty">
@@ -645,11 +784,9 @@
               Galería
             </button>
           </div>
-
           <p class="foto-error" id="fotoError">Necesitamos tu foto para crear la figurita.</p>
         </div>
 
-        <!-- DATOS -->
         <div class="field" id="fieldNombre">
           <label class="field__label" for="inputNombre">Nombre</label>
           <input class="field__input" type="text" id="inputNombre" placeholder="Tu nombre completo"
@@ -665,11 +802,10 @@
         </div>
 
         <div class="field" id="fieldArea">
-          <label class="field__label" for="inputArea">Área</label>
+          <label class="field__label" for="inputArea">Area</label>
           <div class="field__select-wrap">
             <select class="field__select" id="inputArea">
-              <option value="" disabled selected>Seleccioná tu área</option>
-              <!-- Reemplazar con las áreas reales -->
+              <option value="" disabled selected>Seleccioná tu area</option>
               <option>Producto</option>
               <option>Tecnología</option>
               <option>Marketing</option>
@@ -681,7 +817,7 @@
               <option>Otra</option>
             </select>
           </div>
-          <p class="field__error">Seleccioná tu área.</p>
+          <p class="field__error">Seleccioná tu area.</p>
         </div>
 
         <div class="field" id="fieldSuperpoder">
@@ -709,7 +845,6 @@
 
         <hr class="divider" />
 
-        <!-- CONSENTIMIENTOS -->
         <label class="consent-block consent-block--required" id="consentGen">
           <input type="checkbox" id="checkGen" />
           <div class="consent-block__body">
@@ -717,8 +852,8 @@
               Autorizo el uso de mis datos e imagen
               <span class="badge badge--req">Requerido</span>
             </div>
-            Acepto que mis datos y foto se usen para generar y enviarme la figurita por mail. La imagen se procesa de
-            forma automatizada y no se comparte con terceros.
+            Acepto que mis datos y foto se usen para generar y enviarme la figurita por mail.
+            La imagen se procesa de forma automatizada y no se comparte con terceros.
           </div>
         </label>
 
@@ -729,11 +864,10 @@
               Quiero aparecer en el mural del evento
               <span class="badge badge--opt">Opcional</span>
             </div>
-            Mi figurita se mostrará en la pantalla del evento, visible para todos los colaboradores presentes.
+            Mi figurita se mostrará en la pantalla del evento, visible para todos los colaboradores.
           </div>
         </label>
 
-        <!-- PROGRESO -->
         <div class="progress" id="progress">
           <div class="progress__bar">
             <div class="progress__fill" id="progressFill"></div>
@@ -741,51 +875,100 @@
           <p class="progress__label" id="progressLabel">Preparando…</p>
         </div>
 
-        <!-- ERROR -->
         <div class="error-banner" id="errorBanner"></div>
 
-        <!-- SUBMIT -->
-        <button type="button" class="btn-submit" id="btnSubmit">
+        <button type="button" class="btn-submit" id="btnSubmit" disabled>
           Crear mi figurita 🎴
         </button>
-
-      </div><!-- /#screenForm -->
-
-      <!-- ── PANTALLA ÉXITO (oculta hasta el submit exitoso) ── -->
-      <div class="success-screen" id="screenSuccess">
-        <div class="success-screen__icon">
-          <svg viewBox="0 0 24 24">
-            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-          </svg>
-        </div>
-        <p class="success-screen__title">¡Ya estás en la baraja! 🎉</p>
-        <p class="success-screen__body">
-          Tu figurita está siendo creada.<br>
-          La vas a recibir en tu correo antes de que termine el día.<br><br>
-          No hace falta completar el formulario de nuevo.
-        </p>
       </div>
+
+      <!-- ── PANTALLA DE ÉXITO ────────────────────────────── -->
+      <div class="success-screen" id="screenSuccess">
+
+        <!-- Estado 1: esperando generación -->
+        <div class="waiting-block" id="waitingBlock">
+          <div class="spinner"></div>
+          <p class="waiting-title">¡Recibimos tu figurita! 🎴</p>
+          <p class="waiting-sub">
+            Estamos generando tu figurita.<br>
+            Aparece acá en unos segundos, ¡no cierres esta pantalla!
+          </p>
+          <div class="poll-dots">
+            <span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <!-- Estado 2: figurita lista -->
+        <div class="figurita-block hidden" id="figuritaBlock">
+          <div class="figurita-block__check">
+            <svg viewBox="0 0 24 24">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+            </svg>
+          </div>
+          <p class="figurita-block__title">¡Tu figurita está lista! 🎉</p>
+          <p class="figurita-block__sub">
+            También te la mandamos por mail para que la tengas siempre.
+          </p>
+
+          <div class="figurita-img-wrap">
+            <img class="figurita-img" id="figuritaImg" src="" alt="Tu figurita Personal Pay" />
+          </div>
+
+          <div class="action-btns">
+            <a class="action-btn action-btn--download" id="btnDownload" href="#"
+              download="mi-figurita-personal-pay.png">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Descargar figurita
+            </a>
+            <a class="action-btn action-btn--whatsapp" id="btnWhatsapp" href="#" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" />
+              </svg>
+              Compartir por WhatsApp
+            </a>
+            <a class="action-btn action-btn--mail" id="btnMail" href="#">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
+              Enviar por mail
+            </a>
+          </div>
+
+          <p class="success-footer">
+            También te llegará una copia a tu correo antes de que termine el día.
+          </p>
+        </div>
+
+      </div><!-- /#screenSuccess -->
 
     </div><!-- /#cardMain -->
 
     <script>
-      /* ───────────────────────────────────────────────────────────
-         CONFIG
-      ─────────────────────────────────────────────────────────── */
-      const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwb_blECxEBUJMKPtg1Oh82Zq3f-W1RBzpWKhOZaPq53uibZO55l4_CMMJMqu6irgvu/exec';
-      const MAX_PHOTO_PX = 1200;   // lado mayor máximo en px antes de subir
-      const JPEG_QUALITY = 0.88;   // 0–1
-      const FETCH_TIMEOUT = 30000;  // 30 segundos
+      /* ── CONFIG ──────────────────────────────────────────────── */
+      const BACKEND_URL = 'https://script.google.com/macros/s/REEMPLAZAR_CON_WEB_APP_ID/exec';
+      const MAX_PHOTO_PX = 1200;
+      const JPEG_QUALITY = 0.88;
+      const FETCH_TIMEOUT = 30000;
+      // Polling: intervalo entre consultas al backend (ms) y máximo de intentos
+      const POLL_INTERVAL = 5000;
+      const POLL_MAX = 36;   // 36 × 5s = 3 minutos máximo de espera
 
-      /* ───────────────────────────────────────────────────────────
-         STATE
-      ─────────────────────────────────────────────────────────── */
-      let capturedBlob = null;  // Blob JPEG final, listo para subir
-      let isSubmitting = false; // guard contra doble envío
+      /* ── STATE ───────────────────────────────────────────────── */
+      let capturedBlob = null;
+      let isSubmitting = false;
+      let pollTimer = null;
+      let pollCount = 0;
+      let submittedMail = '';
 
-      /* ───────────────────────────────────────────────────────────
-         REFS
-      ─────────────────────────────────────────────────────────── */
+      /* ── REFS ────────────────────────────────────────────────── */
       const fotoPreview = document.getElementById('fotoPreview');
       const previewCanvas = document.getElementById('previewCanvas');
       const inputCamera = document.getElementById('inputCamera');
@@ -801,50 +984,47 @@
       const errorBanner = document.getElementById('errorBanner');
       const screenForm = document.getElementById('screenForm');
       const screenSuccess = document.getElementById('screenSuccess');
+      const waitingBlock = document.getElementById('waitingBlock');
+      const figuritaBlock = document.getElementById('figuritaBlock');
+      const figuritaImg = document.getElementById('figuritaImg');
+      const btnDownload = document.getElementById('btnDownload');
+      const btnWhatsapp = document.getElementById('btnWhatsapp');
+      const btnMail = document.getElementById('btnMail');
 
-      /* ───────────────────────────────────────────────────────────
-         FOTO — CAPTURA
-      ─────────────────────────────────────────────────────────── */
+      /* ── FOTO: CAPTURA ───────────────────────────────────────── */
       btnCamera.addEventListener('click', () => inputCamera.click());
       btnGallery.addEventListener('click', () => inputGallery.click());
       btnChange.addEventListener('click', () => inputGallery.click());
 
-      inputCamera.addEventListener('change', e => handleFileInput(e.target.files[0]));
-      inputGallery.addEventListener('change', e => handleFileInput(e.target.files[0]));
+      inputCamera.addEventListener('change', e => { handleFileInput(e.target.files[0]); inputCamera.value = ''; });
+      inputGallery.addEventListener('change', e => { handleFileInput(e.target.files[0]); inputGallery.value = ''; });
 
       async function handleFileInput(file) {
-        // Limpiar inputs para permitir volver a seleccionar el mismo archivo
-        inputCamera.value = '';
-        inputGallery.value = '';
-
         if (!file) return;
-
         fotoError.classList.remove('visible');
         fotoPreview.classList.remove('has-photo');
         capturedBlob = null;
 
-        // Mostrar progreso ANTES de setProgress para que el primer frame se vea
         setProgress(0, 'Leyendo imagen…');
         progress.classList.add('visible');
 
         try {
           setProgress(10, 'Leyendo imagen…');
 
-          // Leer orientación EXIF en paralelo con la decodificación
           const [orientation, bitmap] = await Promise.all([
             getExifOrientation(file),
-            createImageBitmap(file)
+            // imageOrientation:'none' evita que el browser corrija EXIF automáticamente
+            // (comportamiento inconsistente entre iOS y Android)
+            createImageBitmap(file, { imageOrientation: 'none' })
+              .catch(() => createImageBitmap(file))
           ]);
 
           setProgress(50, 'Procesando foto…');
-
           capturedBlob = await drawToJpeg(bitmap, orientation);
-          bitmap.close(); // liberar memoria del bitmap original
+          bitmap.close();
 
           setProgress(90, 'Generando vista previa…');
-
-          // Dibujar preview con crop cuadrado centrado
-          drawSquarePreview(capturedBlob);
+          await drawSquarePreview(capturedBlob);
 
           fotoPreview.classList.add('has-photo');
           setProgress(100, '¡Foto lista!');
@@ -860,53 +1040,34 @@
         }
       }
 
-      /**
-       * Dibuja la imagen en el canvas del preview con crop cuadrado centrado.
-       * Esto replica object-fit: cover que CSS no aplica a <canvas>.
-       */
       async function drawSquarePreview(blob) {
         const bmp = await createImageBitmap(blob);
         const size = Math.min(bmp.width, bmp.height);
         const sx = (bmp.width - size) / 2;
         const sy = (bmp.height - size) / 2;
-
-        // Renderizar al canvas al tamaño real del contenedor para nitidez
         const container = fotoPreview.getBoundingClientRect();
         const px = Math.round((container.width || 240) * devicePixelRatio);
-
         previewCanvas.width = px;
         previewCanvas.height = px;
         previewCanvas.style.width = '100%';
         previewCanvas.style.height = '100%';
-
-        const ctx = previewCanvas.getContext('2d');
-        ctx.drawImage(bmp, sx, sy, size, size, 0, 0, px, px);
+        previewCanvas.getContext('2d').drawImage(bmp, sx, sy, size, size, 0, 0, px, px);
         bmp.close();
       }
 
-      /* ───────────────────────────────────────────────────────────
-         FOTO — LECTURA EXIF
-      ─────────────────────────────────────────────────────────── */
-
-      /**
-       * Lee la orientación EXIF de un JPEG.
-       * Devuelve 1–8 (1 = sin rotación). Para archivos no-JPEG devuelve 1.
-       * Solo lee los primeros 64KB, suficiente para el bloque APP1.
-       */
+      /* ── FOTO: EXIF ──────────────────────────────────────────── */
       function getExifOrientation(file) {
         return new Promise(resolve => {
           const reader = new FileReader();
           reader.onerror = () => resolve(1);
           reader.onload = ({ target: { result } }) => {
             const view = new DataView(result);
-            // Marcador SOI de JPEG
             if (view.getUint16(0, false) !== 0xFFD8) return resolve(1);
             let offset = 2;
             while (offset + 4 < view.byteLength) {
               const marker = view.getUint16(offset, false);
               offset += 2;
               if (marker === 0xFFE1) {
-                // Verificar firma "Exif\0\0"
                 if (view.getUint32(offset + 2, false) !== 0x45786966) return resolve(1);
                 const little = view.getUint16(offset + 8, false) === 0x4949;
                 const ifdOffset = offset + 8 + view.getUint32(offset + 12, little);
@@ -923,9 +1084,7 @@
                 break;
               } else if (offset + 2 <= view.byteLength) {
                 offset += view.getUint16(offset, false);
-              } else {
-                break;
-              }
+              } else { break; }
             }
             resolve(1);
           };
@@ -933,28 +1092,17 @@
         });
       }
 
-      /* ───────────────────────────────────────────────────────────
-         FOTO — CONVERSIÓN Y CORRECCIÓN EXIF
-      ─────────────────────────────────────────────────────────── */
-
-      /**
-       * Recibe un ImageBitmap y la orientación EXIF (1–8).
-       * Aplica la transformación de corrección, escala al MAX_PHOTO_PX
-       * y devuelve un Blob JPEG con orientación 1 (normal).
-       */
+      /* ── FOTO: CONVERSIÓN JPEG ───────────────────────────────── */
       function drawToJpeg(bitmap, orientation) {
         return new Promise((resolve, reject) => {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
+          const w = bitmap.width;
+          const h = bitmap.height;
           const swap = orientation >= 5 && orientation <= 8;
-          const srcW = bitmap.width;
-          const srcH = bitmap.height;
 
-          // Dimensiones de salida corregidas (intercambio ancho/alto para rotaciones 90/270)
-          let outW = swap ? srcH : srcW;
-          let outH = swap ? srcW : srcH;
-
-          // Escalar al máximo configurado
+          let outW = swap ? h : w;
+          let outH = swap ? w : h;
           const ratio = Math.min(1, MAX_PHOTO_PX / Math.max(outW, outH));
           outW = Math.round(outW * ratio);
           outH = Math.round(outH * ratio);
@@ -962,7 +1110,6 @@
           canvas.width = outW;
           canvas.height = outH;
 
-          // Transformación para cada valor de orientación EXIF
           ctx.save();
           switch (orientation) {
             case 2: ctx.transform(-1, 0, 0, 1, outW, 0); break;
@@ -972,26 +1119,19 @@
             case 6: ctx.transform(0, 1, -1, 0, outH, 0); break;
             case 7: ctx.transform(0, -1, -1, 0, outH, outW); break;
             case 8: ctx.transform(0, -1, 1, 0, 0, outW); break;
-            // case 1: sin transformación
           }
-
-          // drawW/drawH en coordenadas pre-transformación
+          // Dibujar en dimensiones pre-transformación
           ctx.drawImage(bitmap, 0, 0, swap ? outH : outW, swap ? outW : outH);
           ctx.restore();
 
           canvas.toBlob(
-            blob => blob
-              ? resolve(blob)
-              : reject(new Error('canvas.toBlob devolvió null. Browser sin soporte o memoria insuficiente.')),
-            'image/jpeg',
-            JPEG_QUALITY
+            blob => blob ? resolve(blob) : reject(new Error('canvas.toBlob devolvió null.')),
+            'image/jpeg', JPEG_QUALITY
           );
         });
       }
 
-      /* ───────────────────────────────────────────────────────────
-         CONTADORES DE CARACTERES
-      ─────────────────────────────────────────────────────────── */
+      /* ── CONTADORES ──────────────────────────────────────────── */
       function setupCounter(inputId, counterId, max) {
         const input = document.getElementById(inputId);
         const counter = document.getElementById(counterId);
@@ -1008,9 +1148,7 @@
       setupCounter('inputSuperpoder', 'counterSuperpoder', 60);
       setupCounter('inputActitud', 'counterActitud', 40);
 
-      /* ───────────────────────────────────────────────────────────
-         CONSENTIMIENTOS — feedback visual
-      ─────────────────────────────────────────────────────────── */
+      /* ── CONSENTIMIENTOS ─────────────────────────────────────── */
       document.querySelectorAll('.consent-block input[type="checkbox"]').forEach(cb => {
         cb.addEventListener('change', () => {
           const block = cb.closest('.consent-block');
@@ -1019,14 +1157,23 @@
         });
       });
 
-      /* ───────────────────────────────────────────────────────────
-         VALIDACIÓN
-      ─────────────────────────────────────────────────────────── */
+      // Habilitar/deshabilitar el botón según el consentimiento obligatorio
+      document.getElementById('checkGen').addEventListener('change', function () {
+        btnSubmit.disabled = !this.checked;
+      });
+
+      // Tap sobre el cuadro de foto (sin foto aún) → abre cámara directamente
+      fotoPreview.addEventListener('click', () => {
+        if (!fotoPreview.classList.contains('has-photo')) {
+          inputCamera.click();
+        }
+      });
+
+      /* ── VALIDACIÓN ──────────────────────────────────────────── */
       function validateForm() {
         let valid = true;
         let firstBad = null;
 
-        // Foto
         if (!capturedBlob) {
           fotoError.textContent = 'Necesitamos tu foto para crear la figurita.';
           fotoError.classList.add('visible');
@@ -1036,8 +1183,7 @@
           fotoError.classList.remove('visible');
         }
 
-        // Campos de texto
-        const fieldRules = [
+        const rules = [
           { wrapId: 'fieldNombre', inputId: 'inputNombre', test: v => v.trim().length >= 2 },
           { wrapId: 'fieldMail', inputId: 'inputMail', test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) },
           { wrapId: 'fieldArea', inputId: 'inputArea', test: v => v !== '' },
@@ -1045,7 +1191,7 @@
           { wrapId: 'fieldActitud', inputId: 'inputActitud', test: v => v.trim().length >= 3 },
         ];
 
-        fieldRules.forEach(({ wrapId, inputId, test }) => {
+        rules.forEach(({ wrapId, inputId, test }) => {
           const wrap = document.getElementById(wrapId);
           const val = document.getElementById(inputId).value;
           if (!test(val)) {
@@ -1057,7 +1203,6 @@
           }
         });
 
-        // Consentimiento obligatorio
         const genBlock = document.getElementById('consentGen');
         if (!document.getElementById('checkGen').checked) {
           genBlock.classList.add('is-error');
@@ -1067,15 +1212,10 @@
           genBlock.classList.remove('is-error');
         }
 
-        // Scroll al primer error con offset para que no quede bajo el header
-        if (firstBad) {
-          firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
+        if (firstBad) firstBad.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return valid;
       }
 
-      // Limpiar error de cada campo cuando el usuario empieza a editar
       ['fieldNombre', 'fieldMail', 'fieldArea', 'fieldSuperpoder', 'fieldActitud'].forEach(id => {
         const wrap = document.getElementById(id);
         const input = wrap.querySelector('input, select');
@@ -1083,17 +1223,14 @@
         input.addEventListener('change', () => wrap.classList.remove('is-error'));
       });
 
-      /* ───────────────────────────────────────────────────────────
-         SUBMIT
-      ─────────────────────────────────────────────────────────── */
+      /* ── SUBMIT ──────────────────────────────────────────────── */
       btnSubmit.addEventListener('click', async () => {
         if (isSubmitting) return;
         errorBanner.classList.remove('visible');
-
         if (!validateForm()) return;
 
         isSubmitting = true;
-        btnSubmit.disabled = true;
+        btnSubmit.disabled = true; // ya estaba disabled si llegó hasta acá con checkGen checked
 
         setProgress(0, 'Preparando foto…');
         progress.classList.add('visible');
@@ -1103,9 +1240,11 @@
           const base64 = await blobToBase64(capturedBlob);
 
           setProgress(40, 'Enviando datos…');
+          submittedMail = document.getElementById('inputMail').value.trim().toLowerCase();
+
           const payload = {
             nombre: document.getElementById('inputNombre').value.trim(),
-            mail: document.getElementById('inputMail').value.trim().toLowerCase(),
+            mail: submittedMail,
             area: document.getElementById('inputArea').value,
             superpoder: document.getElementById('inputSuperpoder').value.trim(),
             actitud: document.getElementById('inputActitud').value.trim(),
@@ -1115,10 +1254,8 @@
 
           setProgress(65, 'Registrando inscripción…');
 
-          // Fetch con timeout via AbortController
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
-
           let response;
           try {
             response = await fetch(BACKEND_URL, {
@@ -1133,22 +1270,18 @@
 
           setProgress(90, 'Casi listo…');
 
-          if (!response.ok) {
-            throw new Error(`server_${response.status}`);
-          }
-
+          if (!response.ok) throw new Error(`server_${response.status}`);
           const result = await response.json();
-          if (result.status !== 'ok') {
-            throw new Error(result.message || 'server_error');
-          }
+          if (result.status !== 'ok') throw new Error(result.message || 'server_error');
 
-          // ── ÉXITO ──────────────────────────────────────────────
+          // Mostrar pantalla de éxito y arrancar el polling
           setProgress(100, '¡Listo!');
           setTimeout(() => {
             progress.classList.remove('visible');
             screenForm.style.display = 'none';
             screenSuccess.classList.add('visible');
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            startPolling();
           }, 500);
 
         } catch (err) {
@@ -1157,26 +1290,102 @@
           btnSubmit.disabled = false;
           isSubmitting = false;
 
-          // Mensajes de error humanizados
           let msg = 'Hubo un problema al enviar. Por favor intentá de nuevo.';
           if (err.name === 'AbortError') {
-            msg = 'La conexión tardó demasiado. Revisá tu señal de internet e intentá de nuevo.';
+            msg = 'La conexión tardó demasiado. Revisá tu señal e intentá de nuevo.';
           } else if (!navigator.onLine) {
             msg = 'No hay conexión a internet. Reconectate e intentá de nuevo.';
           } else if (err.message && err.message.startsWith('server_')) {
-            msg = 'El servidor no está disponible en este momento. Intentá en unos segundos.';
+            msg = 'El servidor no está disponible. Intentá en unos segundos.';
           }
           msg += '\n\nSi el error persiste, avisá a un organizador del evento.';
-
           errorBanner.textContent = msg;
           errorBanner.classList.add('visible');
           errorBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       });
 
-      /* ───────────────────────────────────────────────────────────
-         HELPERS
-      ─────────────────────────────────────────────────────────── */
+      /* ── POLLING ─────────────────────────────────────────────── */
+      function startPolling() {
+        pollCount = 0;
+        waitingBlock.classList.remove('hidden');
+        figuritaBlock.classList.add('hidden');
+        pollTimer = setInterval(checkFigurita, POLL_INTERVAL);
+      }
+
+      async function checkFigurita() {
+        pollCount++;
+
+        if (pollCount > POLL_MAX) {
+          clearInterval(pollTimer);
+          // Tiempo agotado: mostrar éxito genérico sin imagen
+          showSuccessGenerico();
+          return;
+        }
+
+        try {
+          const url = `${BACKEND_URL}?action=check&mail=${encodeURIComponent(submittedMail)}`;
+          const response = await fetch(url, { method: 'GET' });
+          if (!response.ok) return; // error transitorio, reintentar
+
+          const data = await response.json();
+
+          if (data.status === 'ready' && data.url) {
+            clearInterval(pollTimer);
+            showFigurita(data.url);
+          }
+          // si status === 'pending', seguir esperando
+
+        } catch (_) {
+          // Error de red transitorio — seguir intentando
+        }
+      }
+
+      function showFigurita(url) {
+        // Construir URL de descarga directa desde Drive
+        // url tiene formato: https://drive.google.com/uc?export=view&id=FILE_ID
+        // Para descarga directa: cambiar export=view por export=download
+        const downloadUrl = url.replace('export=view', 'export=download');
+
+        figuritaImg.src = url;
+        btnDownload.href = downloadUrl;
+
+        // WhatsApp: compartir link (Web Share API si disponible, sino link directo)
+        const whatsappText = encodeURIComponent(
+          '¡Mirá mi figurita de Personal Pay! 🎴 ' + url
+        );
+        btnWhatsapp.href = `https://wa.me/?text=${whatsappText}`;
+
+        // Mail: abrir cliente de mail con el link
+        const mailSubject = encodeURIComponent('Mi figurita de Personal Pay 🎴');
+        const mailBody = encodeURIComponent(
+          '¡Hola! Te comparto mi figurita de Personal Pay:\n\n' + url
+        );
+        btnMail.href = `mailto:?subject=${mailSubject}&body=${mailBody}`;
+
+        waitingBlock.classList.add('hidden');
+        figuritaBlock.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function showSuccessGenerico() {
+        // Si el polling agotó el tiempo, mostrar éxito sin imagen
+        // La figurita igual llega por mail
+        waitingBlock.innerHTML = `
+        <div class="figurita-block__check" style="margin:0 auto 16px">
+          <svg viewBox="0 0 24 24" fill="white" width="32" height="32">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+        </div>
+        <p class="waiting-title">¡Ya estás en la baraja! 🎉</p>
+        <p class="waiting-sub">
+          Tu figurita está siendo procesada.<br>
+          La vas a recibir en tu correo antes de que termine el día.
+        </p>
+      `;
+      }
+
+      /* ── HELPERS ─────────────────────────────────────────────── */
       function setProgress(pct, label) {
         progressFill.style.width = pct + '%';
         progressLabel.textContent = label;
