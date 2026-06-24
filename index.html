@@ -727,7 +727,7 @@
   <body>
 
     <header class="header">
-      <p class="header__eyebrow">Personal Pay · All Hands 2026</p>
+      <p class="header__eyebrow">Personal Pay · All Hands 2025</p>
       <h1 class="header__title">Tu <mark>Figurita</mark><br>Personal Pay</h1>
       <p class="header__sub">Completá tus datos, sacate una foto y listo. Tu figurita aparece en minutos.</p>
     </header>
@@ -878,7 +878,7 @@
         <div class="error-banner" id="errorBanner"></div>
 
         <button type="button" class="btn-submit" id="btnSubmit" disabled>
-          Crear mi figurita 🎴
+          Crear mi figurita
         </button>
       </div>
 
@@ -888,7 +888,7 @@
         <!-- Estado 1: esperando generación -->
         <div class="waiting-block" id="waitingBlock">
           <div class="spinner"></div>
-          <p class="waiting-title">¡Recibimos tu figurita! 🎴</p>
+          <p class="waiting-title">¡Recibimos tu figurita!</p>
           <p class="waiting-sub">
             Estamos generando tu figurita.<br>
             Aparece acá en unos segundos, ¡no cierres esta pantalla!
@@ -956,7 +956,7 @@
       const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwb_blECxEBUJMKPtg1Oh82Zq3f-W1RBzpWKhOZaPq53uibZO55l4_CMMJMqu6irgvu/exec';
       const MAX_PHOTO_PX = 1200;
       const JPEG_QUALITY = 0.88;
-      const FETCH_TIMEOUT = 30000;
+      const FETCH_TIMEOUT = 60000;  // 60s — la generación sincrónica tarda más
       // Polling: intervalo entre consultas al backend (ms) y máximo de intentos
       const POLL_INTERVAL = 5000;
       const POLL_MAX = 36;   // 36 × 5s = 3 minutos máximo de espera
@@ -1307,15 +1307,6 @@
           const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
           let response;
           try {
-
-            setProgress(65, 'Registrando inscripción…');
-
-            // DEBUG TEMPORAL — borrar después
-            console.log('Enviando a:', BACKEND_URL);
-            console.log('Payload keys:', Object.keys(payload));
-            console.log('fotoBase64 length:', payload.fotoBase64.length);
-
-            const controller = new AbortController();
             response = await fetch(BACKEND_URL, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain' },
@@ -1326,21 +1317,31 @@
             clearTimeout(timeoutId);
           }
 
-          setProgress(90, 'Casi listo…');
+          setProgress(80, 'Generando tu figurita…');
 
           if (!response.ok) throw new Error(`server_${response.status}`);
           const result = await response.json();
-          if (result.status !== 'ok') throw new Error(result.message || 'server_error');
 
-          // Mostrar pantalla de éxito y arrancar el polling
+          if (result.status === 'error') {
+            throw new Error(result.message || 'server_error');
+          }
+
           setProgress(100, '¡Listo!');
+
           setTimeout(() => {
             progress.classList.remove('visible');
             screenForm.style.display = 'none';
             screenSuccess.classList.add('visible');
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            startPolling();
-          }, 500);
+
+            if (result.status === 'ready' && result.url) {
+              // Figurita generada al instante — mostrarla directo
+              showFigurita(result.url);
+            } else {
+              // Generación diferida — esperar con polling
+              startPolling();
+            }
+          }, 400);
 
         } catch (err) {
           console.error('[submit]', err);
@@ -1410,12 +1411,12 @@
 
         // WhatsApp: compartir link (Web Share API si disponible, sino link directo)
         const whatsappText = encodeURIComponent(
-          '¡Mirá mi figurita de Personal Pay! 🎴 ' + url
+          '¡Mirá mi figurita de Personal Pay! ' + url
         );
         btnWhatsapp.href = `https://wa.me/?text=${whatsappText}`;
 
         // Mail: abrir cliente de mail con el link
-        const mailSubject = encodeURIComponent('Mi figurita de Personal Pay 🎴');
+        const mailSubject = encodeURIComponent('Mi figurita de Personal Pay');
         const mailBody = encodeURIComponent(
           '¡Hola! Te comparto mi figurita de Personal Pay:\n\n' + url
         );
