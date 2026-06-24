@@ -643,13 +643,13 @@
       /* Imagen de la figurita generada */
       .figurita-img-wrap {
         width: 100%;
-        max-width: 280px;
+        max-width: 420px;
         margin: 0 auto 24px;
         border-radius: 14px;
         overflow: hidden;
         box-shadow: 0 4px 24px rgba(0, 0, 0, .12);
         background: var(--c-bg);
-        aspect-ratio: auto;
+        min-height: 200px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -727,7 +727,7 @@
   <body>
 
     <header class="header">
-      <p class="header__eyebrow">Personal Pay · All Hands 2025</p>
+      <p class="header__eyebrow">Personal Pay · All Hands 2026</p>
       <h1 class="header__title">Tu <mark>Figurita</mark><br>Personal Pay</h1>
       <p class="header__sub">Completá tus datos, sacate una foto y listo. Tu figurita aparece en minutos.</p>
     </header>
@@ -1413,25 +1413,29 @@
       }
 
       function showFigurita(url) {
-        // Construir URL de descarga directa desde Drive
-        // url tiene formato: https://drive.google.com/uc?export=view&id=FILE_ID
-        // Para descarga directa: cambiar export=view por export=download
-        const downloadUrl = url.replace('export=view', 'export=download');
+        // url viene como: https://drive.google.com/thumbnail?id=FILE_ID&sz=w1600
+        // Extraer el FILE_ID para construir las URLs de descarga y compartir.
+        const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        const fileId = idMatch ? idMatch[1] : '';
+
+        // URL de descarga directa del PNG original (alta calidad)
+        const downloadUrl = fileId
+          ? `https://drive.google.com/uc?export=download&id=${fileId}`
+          : url;
+
+        // URL para compartir (la de thumbnail funciona para previsualizar)
+        const shareUrl = url;
 
         figuritaImg.src = url;
         btnDownload.href = downloadUrl;
 
-        // WhatsApp: compartir link (Web Share API si disponible, sino link directo)
-        const whatsappText = encodeURIComponent(
-          '¡Mirá mi figurita de Personal Pay! ' + url
-        );
+        // WhatsApp
+        const whatsappText = encodeURIComponent('¡Mirá mi figurita de Personal Pay! ' + shareUrl);
         btnWhatsapp.href = `https://wa.me/?text=${whatsappText}`;
 
-        // Mail: abrir cliente de mail con el link
+        // Mail
         const mailSubject = encodeURIComponent('Mi figurita de Personal Pay');
-        const mailBody = encodeURIComponent(
-          '¡Hola! Te comparto mi figurita de Personal Pay:\n\n' + url
-        );
+        const mailBody = encodeURIComponent('¡Hola! Te comparto mi figurita de Personal Pay:\n\n' + shareUrl);
         btnMail.href = `mailto:?subject=${mailSubject}&body=${mailBody}`;
 
         waitingBlock.classList.add('hidden');
