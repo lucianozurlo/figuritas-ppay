@@ -1142,38 +1142,50 @@
         });
       }
 
-      /* ── FOTO: CONVERSIÓN JPEG ───────────────────────────────── */
+      /* ── FOTO: CONVERSIÓN JPEG + RECORTE CUADRADO ────────────── */
+      // Devuelve un JPEG cuadrado (1:1) con la orientación EXIF corregida.
+      // El recorte cuadrado centrado garantiza que la figurita nunca se deforme:
+      // la forma de foto en la plantilla de Slides también es cuadrada.
       function drawToJpeg(img, orientation) {
         return new Promise((resolve, reject) => {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
+          // Paso 1: corregir orientación en un canvas intermedio
+          const tmp = document.createElement('canvas');
+          const tctx = tmp.getContext('2d');
           const w = img.naturalWidth;
           const h = img.naturalHeight;
           const swap = orientation >= 5 && orientation <= 8;
 
-          let outW = swap ? h : w;
-          let outH = swap ? w : h;
-          const ratio = Math.min(1, MAX_PHOTO_PX / Math.max(outW, outH));
-          outW = Math.round(outW * ratio);
-          outH = Math.round(outH * ratio);
+          let corrW = swap ? h : w;
+          let corrH = swap ? w : h;
 
-          canvas.width = outW;
-          canvas.height = outH;
+          tmp.width = corrW;
+          tmp.height = corrH;
 
-          ctx.save();
+          tctx.save();
           switch (orientation) {
-            case 2: ctx.transform(-1, 0, 0, 1, outW, 0); break;
-            case 3: ctx.transform(-1, 0, 0, -1, outW, outH); break;
-            case 4: ctx.transform(1, 0, 0, -1, 0, outH); break;
-            case 5: ctx.transform(0, 1, 1, 0, 0, 0); break;
-            case 6: ctx.transform(0, 1, -1, 0, outH, 0); break;
-            case 7: ctx.transform(0, -1, -1, 0, outH, outW); break;
-            case 8: ctx.transform(0, -1, 1, 0, 0, outW); break;
+            case 2: tctx.transform(-1, 0, 0, 1, corrW, 0); break;
+            case 3: tctx.transform(-1, 0, 0, -1, corrW, corrH); break;
+            case 4: tctx.transform(1, 0, 0, -1, 0, corrH); break;
+            case 5: tctx.transform(0, 1, 1, 0, 0, 0); break;
+            case 6: tctx.transform(0, 1, -1, 0, corrH, 0); break;
+            case 7: tctx.transform(0, -1, -1, 0, corrH, corrW); break;
+            case 8: tctx.transform(0, -1, 1, 0, 0, corrW); break;
           }
-          ctx.drawImage(img, 0, 0, swap ? outH : outW, swap ? outW : outH);
-          ctx.restore();
+          tctx.drawImage(img, 0, 0, swap ? corrH : corrW, swap ? corrW : corrH);
+          tctx.restore();
 
-          canvas.toBlob(
+          // Paso 2: recorte cuadrado centrado (object-fit: cover hacia 1:1)
+          const lado = Math.min(corrW, corrH);
+          const sx = (corrW - lado) / 2;
+          const sy = (corrH - lado) / 2;
+          const outLado = Math.min(lado, MAX_PHOTO_PX);
+
+          const out = document.createElement('canvas');
+          out.width = outLado;
+          out.height = outLado;
+          out.getContext('2d').drawImage(tmp, sx, sy, lado, lado, 0, 0, outLado, outLado);
+
+          out.toBlob(
             blob => blob ? resolve(blob) : reject(new Error('canvas.toBlob devolvió null.')),
             'image/jpeg', JPEG_QUALITY
           );
