@@ -1307,6 +1307,15 @@
           const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
           let response;
           try {
+
+            setProgress(65, 'Registrando inscripción…');
+
+            // DEBUG TEMPORAL — borrar después
+            console.log('Enviando a:', BACKEND_URL);
+            console.log('Payload keys:', Object.keys(payload));
+            console.log('fotoBase64 length:', payload.fotoBase64.length);
+
+            const controller = new AbortController();
             response = await fetch(BACKEND_URL, {
               method: 'POST',
               headers: { 'Content-Type': 'text/plain' },
