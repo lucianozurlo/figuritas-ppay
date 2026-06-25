@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0062FF" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <title>4 Mi Figurita Personal Pay</title>
+    <title>5 Mi Figurita Personal Pay</title>
     <style>
       :root {
         --c-bg: #F2F4F8;
@@ -702,15 +702,32 @@
         color: #fff;
       }
 
-      .action-btn--whatsapp {
-        background: #25D366;
+      .action-btn--share {
+        background: var(--c-accent);
         color: #fff;
       }
 
-      .action-btn--mail {
+      .action-btn--again {
         background: var(--c-surface);
         color: var(--c-text);
         border: 1.5px solid var(--c-border);
+      }
+
+      /* Aviso de sobrescritura cuando el mail ya tiene figurita */
+      .warn-banner {
+        display: none;
+        margin-top: 8px;
+        padding: 12px 14px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid #F59E0B;
+        background: #FFFBEB;
+        font-size: 13px;
+        color: #92400E;
+        line-height: 1.5;
+      }
+
+      .warn-banner.visible {
+        display: block;
       }
 
       .success-footer {
@@ -799,6 +816,9 @@
           <input class="field__input" type="email" id="inputMail" placeholder="tu@mail.com" autocomplete="email"
             autocorrect="off" autocapitalize="none" inputmode="email" enterkeyhint="next" />
           <p class="field__error">Ingresá un mail válido.</p>
+          <div class="warn-banner" id="mailWarn">
+            ⚠️ Este mail ya tiene una figurita creada. Si continuás, se reemplazará por la nueva.
+          </div>
         </div>
 
         <div class="field" id="fieldArea">
@@ -915,8 +935,7 @@
           </div>
 
           <div class="action-btns">
-            <a class="action-btn action-btn--download" id="btnDownload" href="#"
-              download="mi-figurita-personal-pay.png">
+            <button type="button" class="action-btn action-btn--download" id="btnDownload">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
                 stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -924,22 +943,26 @@
                 <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
               Descargar figurita
-            </a>
-            <a class="action-btn action-btn--whatsapp" id="btnWhatsapp" href="#" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" />
-              </svg>
-              Compartir por WhatsApp
-            </a>
-            <a class="action-btn action-btn--mail" id="btnMail" href="#">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            </button>
+            <button type="button" class="action-btn action-btn--share" id="btnShare">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
                 stroke-linejoin="round">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                <polyline points="22,6 12,13 2,6" />
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
               </svg>
-              Enviar por mail
-            </a>
+              Compartir figurita
+            </button>
+            <button type="button" class="action-btn action-btn--again" id="btnAgain">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10" />
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+              </svg>
+              Crear otra figurita
+            </button>
           </div>
 
           <p class="success-footer">
@@ -967,6 +990,8 @@
       let pollTimer = null;
       let pollCount = 0;
       let submittedMail = '';
+      let figuritaFileBlob = null;
+      let figuritaFileName = 'mi-figurita-personal-pay.png';
 
       /* ── REFS ────────────────────────────────────────────────── */
       const fotoPreview = document.getElementById('fotoPreview');
@@ -988,8 +1013,9 @@
       const figuritaBlock = document.getElementById('figuritaBlock');
       const figuritaImg = document.getElementById('figuritaImg');
       const btnDownload = document.getElementById('btnDownload');
-      const btnWhatsapp = document.getElementById('btnWhatsapp');
-      const btnMail = document.getElementById('btnMail');
+      const btnShare = document.getElementById('btnShare');
+      const btnAgain = document.getElementById('btnAgain');
+      const mailWarn = document.getElementById('mailWarn');
 
       /* ── FOTO: CAPTURA ───────────────────────────────────────── */
       btnCamera.addEventListener('click', () => inputCamera.click());
@@ -1348,7 +1374,7 @@
 
             if (result.status === 'ready' && result.url) {
               // Figurita generada al instante — mostrarla directo
-              showFigurita(result.url);
+              showFigurita(result.url, result.base64);
             } else {
               // Generación diferida — esperar con polling
               startPolling();
@@ -1416,36 +1442,152 @@
         }
       }
 
-      function showFigurita(url) {
-        // url viene como: https://drive.google.com/thumbnail?id=FILE_ID&sz=w1600
-        // Extraer el FILE_ID para construir las URLs de descarga y compartir.
-        const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-        const fileId = idMatch ? idMatch[1] : '';
-
-        // URL de descarga directa del PNG original (alta calidad)
-        const downloadUrl = fileId
-          ? `https://drive.google.com/uc?export=download&id=${fileId}`
-          : url;
-
-        // URL para compartir (la de thumbnail funciona para previsualizar)
-        const shareUrl = url;
-
+      function showFigurita(url, base64) {
+        // Mostrar la imagen en pantalla
         figuritaImg.src = url;
-        btnDownload.href = downloadUrl;
 
-        // WhatsApp
-        const whatsappText = encodeURIComponent('¡Mirá mi figurita de Personal Pay! 🎴 ' + shareUrl);
-        btnWhatsapp.href = `https://wa.me/?text=${whatsappText}`;
+        // Si vino el base64 (generación instantánea), construir el blob desde ahí
+        // — evita problemas de CORS al descargar desde Drive.
+        if (base64) {
+          try {
+            const bytes = atob(base64);
+            const arr = new Uint8Array(bytes.length);
+            for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+            figuritaFileBlob = new Blob([arr], { type: 'image/png' });
+          } catch (_) {
+            figuritaFileBlob = null;
+          }
+        } else {
+          // Vino del polling sin base64 — intentar precargar desde la URL directa
+          const idMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+          const fileId = idMatch ? idMatch[1] : '';
+          const dl = fileId ? `https://drive.google.com/uc?export=download&id=${fileId}` : url;
+          btnDownload.dataset.url = dl;
+          fetch(dl).then(r => r.ok ? r.blob() : Promise.reject())
+            .then(b => { figuritaFileBlob = b; })
+            .catch(() => { figuritaFileBlob = null; });
+        }
 
-        // Mail
-        const mailSubject = encodeURIComponent('Mi figurita de Personal Pay 🎴');
-        const mailBody = encodeURIComponent('¡Hola! Te comparto mi figurita de Personal Pay:\n\n' + shareUrl);
-        btnMail.href = `mailto:?subject=${mailSubject}&body=${mailBody}`;
+        btnShare.dataset.url = url;
 
         waitingBlock.classList.add('hidden');
         figuritaBlock.classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
+
+      /* ── DESCARGAR ───────────────────────────────────────────── */
+      btnDownload.addEventListener('click', async () => {
+        if (figuritaFileBlob) {
+          // Descargar el blob precargado
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(figuritaFileBlob);
+          a.download = figuritaFileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(a.href);
+        } else {
+          // Fallback: abrir el link directo en nueva pestaña
+          window.open(btnDownload.dataset.url, '_blank');
+        }
+      });
+
+      /* ── COMPARTIR (Web Share API con imagen adjunta) ────────── */
+      btnShare.addEventListener('click', async () => {
+        const texto = '¡Mirá mi figurita de Personal Pay! 🎴';
+
+        // Si tenemos el blob y el navegador soporta compartir archivos
+        if (figuritaFileBlob && navigator.canShare) {
+          const file = new File([figuritaFileBlob], figuritaFileName, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            try {
+              await navigator.share({
+                files: [file],
+                title: 'Mi figurita Personal Pay',
+                text: texto,
+              });
+              return;
+            } catch (err) {
+              // El usuario canceló o falló — no hacer nada
+              if (err.name === 'AbortError') return;
+            }
+          }
+        }
+
+        // Fallback: compartir solo texto + link si no se puede adjuntar archivo
+        if (navigator.share) {
+          try {
+            await navigator.share({ title: 'Mi figurita Personal Pay', text: texto, url: btnShare.dataset.url });
+            return;
+          } catch (err) {
+            if (err.name === 'AbortError') return;
+          }
+        }
+
+        // Último fallback (desktop sin Web Share): abrir WhatsApp web con el link
+        const wa = encodeURIComponent(texto + ' ' + btnShare.dataset.url);
+        window.open(`https://wa.me/?text=${wa}`, '_blank');
+      });
+
+      /* ── CREAR OTRA FIGURITA ─────────────────────────────────── */
+      btnAgain.addEventListener('click', () => {
+        // Resetear todo el formulario
+        capturedBlob = null;
+        figuritaFileBlob = null;
+        isSubmitting = false;
+        submittedMail = '';
+        if (pollTimer) clearInterval(pollTimer);
+
+        // Limpiar campos
+        document.getElementById('inputNombre').value = '';
+        document.getElementById('inputMail').value = '';
+        document.getElementById('inputArea').value = '';
+        document.getElementById('inputSuperpoder').value = '';
+        document.getElementById('inputActitud').value = '';
+        document.getElementById('checkGen').checked = false;
+        document.getElementById('checkMural').checked = false;
+        document.querySelectorAll('.consent-block').forEach(b => b.classList.remove('is-checked'));
+
+        // Resetear foto
+        fotoPreview.classList.remove('has-photo');
+        fotoError.classList.remove('visible');
+        mailWarn.classList.remove('visible');
+
+        // Resetear contadores
+        document.getElementById('counterSuperpoder').textContent = '0 / 60';
+        document.getElementById('counterActitud').textContent = '0 / 40';
+
+        // Resetear botón
+        btnSubmit.disabled = true;
+        btnSubmit.textContent = 'Crear mi figurita 🎴';
+
+        // Volver al formulario
+        screenSuccess.classList.remove('visible');
+        figuritaBlock.classList.add('hidden');
+        waitingBlock.classList.remove('hidden');
+        screenForm.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
+      /* ── VERIFICAR MAIL EXISTENTE (advertencia sobrescritura) ── */
+      let mailCheckTimer = null;
+      document.getElementById('inputMail').addEventListener('input', function () {
+        clearTimeout(mailCheckTimer);
+        const mail = this.value.trim().toLowerCase();
+        mailWarn.classList.remove('visible');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) return;
+
+        // Esperar 600ms tras dejar de escribir antes de consultar
+        mailCheckTimer = setTimeout(async () => {
+          try {
+            const r = await fetch(`${BACKEND_URL}?action=exists&mail=${encodeURIComponent(mail)}`);
+            const data = await r.json();
+            if (data.exists) {
+              mailWarn.classList.add('visible');
+            }
+          } catch (_) { /* silencioso */ }
+        }, 600);
+      });
 
       function showSuccessGenerico() {
         // Si el polling agotó el tiempo, mostrar éxito sin imagen
