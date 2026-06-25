@@ -1367,6 +1367,7 @@
           } else if (!navigator.onLine) {
             msg = 'No hay conexión a internet. Reconectate e intentá de nuevo.';
           } else if (err.message && err.message.startsWith('server_')) {
+            console.error('[submit] mensaje del backend:', err.message);
             msg = 'El servidor no está disponible. Intentá en unos segundos.';
           }
           msg += '\n\nSi el error persiste, avisá a un organizador del evento.';
