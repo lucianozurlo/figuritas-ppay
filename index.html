@@ -233,6 +233,16 @@
         color: var(--c-muted);
       }
 
+      /* El botón de cámara se oculta en desktop via JS (clase desktop-mode) */
+      .desktop-mode .foto-btn--mobile-only {
+        display: none !important;
+      }
+
+      /* En desktop, la galería ocupa todo el ancho */
+      .desktop-mode .foto-btns {
+        grid-template-columns: 1fr;
+      }
+
       .foto-error {
         display: none;
         margin-top: 8px;
@@ -761,7 +771,7 @@
   <body>
 
     <header class="header">
-      <p class="header__eyebrow">Personal Pay · All Hands 2026</p>
+      <p class="header__eyebrow">Personal Pay · All Hands 2025</p>
       <h1 class="header__title">Tu <mark>Figurita</mark><br>Personal Pay</h1>
       <p class="header__sub">Completá tus datos, sacate una foto y listo. Tu figurita aparece en minutos.</p>
     </header>
@@ -774,8 +784,9 @@
       <!-- ── FORMULARIO ──────────────────────────────────── -->
       <div id="screenForm">
 
+        <!-- FOTO -->
         <div class="foto-section">
-          <span class="foto-section__label">Tu foto</span>
+          <span class="foto-section__label">📷 Foto (selfie o carga de imagen)</span>
           <div class="foto-preview" id="fotoPreview">
             <canvas id="previewCanvas" class="foto-preview__canvas"></canvas>
             <div class="foto-preview__empty">
@@ -786,10 +797,11 @@
                   <circle cx="12" cy="7" r="4" />
                 </svg>
               </div>
-              <p class="foto-preview__empty-text">Usá los botones de abajo para agregar tu foto</p>
+              <p class="foto-preview__empty-text" id="fotoEmptyText">Usá los botones de abajo para agregar tu foto</p>
             </div>
           </div>
 
+          <!-- Botones mobile: Cámara + Galería -->
           <div class="foto-btns" id="fotoBtns">
             <button type="button" class="foto-btn foto-btn--change" id="btnChange">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -800,7 +812,7 @@
               </svg>
               Cambiar foto
             </button>
-            <button type="button" class="foto-btn" id="btnCamera">
+            <button type="button" class="foto-btn foto-btn--mobile-only" id="btnCamera">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                 stroke-linejoin="round">
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
@@ -815,21 +827,23 @@
                 <circle cx="8.5" cy="8.5" r="1.5" />
                 <polyline points="21 15 16 10 5 21" />
               </svg>
-              Galería
+              <span id="btnGalleryLabel">Galería</span>
             </button>
           </div>
           <p class="foto-error" id="fotoError">Necesitamos tu foto para crear la figurita.</p>
         </div>
 
+        <!-- NOMBRE -->
         <div class="field" id="fieldNombre">
-          <label class="field__label" for="inputNombre">Nombre</label>
+          <label class="field__label" for="inputNombre">👤 Nombre</label>
           <input class="field__input" type="text" id="inputNombre" placeholder="Tu nombre completo"
             autocomplete="given-name" autocorrect="off" autocapitalize="words" enterkeyhint="next" />
           <p class="field__error">Ingresá tu nombre.</p>
         </div>
 
+        <!-- MAIL -->
         <div class="field" id="fieldMail">
-          <label class="field__label" for="inputMail">Mail</label>
+          <label class="field__label" for="inputMail">✉️ Mail</label>
           <input class="field__input" type="email" id="inputMail" placeholder="tu@mail.com" autocomplete="email"
             autocorrect="off" autocapitalize="none" inputmode="email" enterkeyhint="next" />
           <p class="field__error">Ingresá un mail válido.</p>
@@ -838,46 +852,57 @@
           </div>
         </div>
 
+        <!-- POSICIÓN (antes "Area") -->
         <div class="field" id="fieldArea">
-          <label class="field__label" for="inputArea">Area</label>
+          <label class="field__label" for="inputArea">⚽ Posición dentro de Personal Pay</label>
+          <input class="field__input" type="text" id="inputArea" placeholder="Ej: Líder de Producto" maxlength="10"
+            autocorrect="off" autocapitalize="words" enterkeyhint="next" />
+          <div class="field__footer">
+            <span class="field__hint">Máximo 10 caracteres</span>
+            <span class="field__counter" id="counterArea">0 / 10</span>
+          </div>
+          <p class="field__error">Ingresá tu posición (máximo 10 caracteres).</p>
+        </div>
+
+        <!-- SUPERPODER (desplegable) -->
+        <div class="field" id="fieldSuperpoder">
+          <label class="field__label" for="inputSuperpoder">✨ Superpoder — qué aportás al equipo</label>
           <div class="field__select-wrap">
-            <select class="field__select" id="inputArea">
-              <option value="" disabled selected>Seleccioná tu area</option>
-              <option>Producto</option>
-              <option>Tecnología</option>
-              <option>Marketing</option>
-              <option>Operaciones</option>
-              <option>Finanzas</option>
-              <option>Legal</option>
-              <option>Personas</option>
-              <option>Ventas</option>
-              <option>Otra</option>
+            <select class="field__select" id="inputSuperpoder">
+              <option value="" disabled selected>Elegí tu superpoder</option>
+              <option>🧠 Resolver desafíos</option>
+              <option>💡 Generar ideas</option>
+              <option>🤝 Conectar personas</option>
+              <option>📅 Organizar el juego</option>
+              <option>🚀 Impulsar la acción</option>
+              <option>🎯 Encontrar oportunidades</option>
+              <option>📣 Comunicar con claridad</option>
+              <option>🔍 Ver lo que otros no ven</option>
+              <option>⚙️ Simplificar lo complejo</option>
+              <option>🌟 Inspirar al equipo</option>
             </select>
           </div>
-          <p class="field__error">Seleccioná tu area.</p>
+          <p class="field__error">Elegí tu superpoder.</p>
         </div>
 
-        <div class="field" id="fieldSuperpoder">
-          <label class="field__label" for="inputSuperpoder">Tu superpoder</label>
-          <input class="field__input" type="text" id="inputSuperpoder"
-            placeholder='Ej: "Resuelvo lo imposible antes del café"' maxlength="60" autocorrect="on"
-            autocapitalize="sentences" enterkeyhint="next" />
-          <div class="field__footer">
-            <span class="field__hint"></span>
-            <span class="field__counter" id="counterSuperpoder">0 / 60</span>
-          </div>
-          <p class="field__error">Contanos tu superpoder.</p>
-        </div>
-
+        <!-- ACTITUD (desplegable) -->
         <div class="field" id="fieldActitud">
-          <label class="field__label" for="inputActitud">Tu actitud</label>
-          <input class="field__input" type="text" id="inputActitud" placeholder='Ej: "Siempre con energía"'
-            maxlength="40" autocorrect="on" autocapitalize="sentences" enterkeyhint="done" />
-          <div class="field__footer">
-            <span class="field__hint"></span>
-            <span class="field__counter" id="counterActitud">0 / 40</span>
+          <label class="field__label" for="inputActitud">🏆 Actitud Alpha — cómo elegís actuar</label>
+          <div class="field__select-wrap">
+            <select class="field__select" id="inputActitud">
+              <option value="" disabled selected>Elegí tu actitud</option>
+              <option>💜 Soy protagonista</option>
+              <option>🤝 Somos clientes</option>
+              <option>👥 Hacemos equipo</option>
+              <option>🌱 Aprendo todos los días</option>
+              <option>💬 Escucho para crecer</option>
+              <option>🎯 Voy por más</option>
+              <option>⚡ Me adapto al cambio</option>
+              <option>❤️ Actúo con confianza</option>
+              <option>🔄 Busco mejorar continuamente</option>
+            </select>
           </div>
-          <p class="field__error">Contanos tu actitud.</p>
+          <p class="field__error">Elegí tu actitud.</p>
         </div>
 
         <hr class="divider" />
@@ -1054,6 +1079,17 @@
       // Detectar si es un dispositivo táctil/móvil con soporte real de compartir
       const esMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)
         && typeof navigator.share === 'function';
+
+      // Detectar desktop para la sección de foto (independiente del share)
+      const esDesktop = !/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+      // Configurar foto según dispositivo
+      if (esDesktop) {
+        document.getElementById('fotoBtns').classList.add('desktop-mode');
+        document.getElementById('fotoEmptyText').textContent = 'Hacé clic para subir tu foto';
+        document.getElementById('btnGalleryLabel').textContent = 'Subí tu foto';
+        // En desktop el tap en el preview también abre solo galería
+      }
 
       /* ── FOTO: CAPTURA ───────────────────────────────────────── */
       btnCamera.addEventListener('click', () => inputCamera.click());
@@ -1270,8 +1306,8 @@
         input.addEventListener('input', update);
         update();
       }
-      setupCounter('inputSuperpoder', 'counterSuperpoder', 60);
-      setupCounter('inputActitud', 'counterActitud', 40);
+      setupCounter('inputArea', 'counterArea', 10);
+      // Superpoder y Actitud son selects — no necesitan contador
 
       /* ── CONSENTIMIENTOS ─────────────────────────────────────── */
       document.querySelectorAll('.consent-block input[type="checkbox"]').forEach(cb => {
@@ -1311,9 +1347,9 @@
         const rules = [
           { wrapId: 'fieldNombre', inputId: 'inputNombre', test: v => v.trim().length >= 2 },
           { wrapId: 'fieldMail', inputId: 'inputMail', test: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) },
-          { wrapId: 'fieldArea', inputId: 'inputArea', test: v => v !== '' },
-          { wrapId: 'fieldSuperpoder', inputId: 'inputSuperpoder', test: v => v.trim().length >= 3 },
-          { wrapId: 'fieldActitud', inputId: 'inputActitud', test: v => v.trim().length >= 3 },
+          { wrapId: 'fieldArea', inputId: 'inputArea', test: v => v.trim().length >= 1 && v.trim().length <= 10 },
+          { wrapId: 'fieldSuperpoder', inputId: 'inputSuperpoder', test: v => v !== '' },
+          { wrapId: 'fieldActitud', inputId: 'inputActitud', test: v => v !== '' },
         ];
 
         rules.forEach(({ wrapId, inputId, test }) => {
@@ -1612,8 +1648,8 @@
         mailWarn.classList.remove('visible');
 
         // Resetear contadores
-        document.getElementById('counterSuperpoder').textContent = '0 / 60';
-        document.getElementById('counterActitud').textContent = '0 / 40';
+        const counterArea = document.getElementById('counterArea');
+        if (counterArea) counterArea.textContent = '0 / 10';
 
         // Resetear botón
         btnSubmit.disabled = true;
