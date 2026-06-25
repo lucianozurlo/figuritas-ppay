@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#0062FF" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <title>3 Mi Figurita Personal Pay</title>
+    <title>Mi Figurita Personal Pay</title>
     <style>
       :root {
         --c-bg: #F2F4F8;
@@ -727,7 +727,7 @@
   <body>
 
     <header class="header">
-      <p class="header__eyebrow">Personal Pay · All Hands 2026</p>
+      <p class="header__eyebrow">Personal Pay · All Hands 2025</p>
       <h1 class="header__title">Tu <mark>Figurita</mark><br>Personal Pay</h1>
       <p class="header__sub">Completá tus datos, sacate una foto y listo. Tu figurita aparece en minutos.</p>
     </header>
@@ -878,7 +878,7 @@
         <div class="error-banner" id="errorBanner"></div>
 
         <button type="button" class="btn-submit" id="btnSubmit" disabled>
-          Crear mi figurita
+          Crear mi figurita 🎴
         </button>
       </div>
 
@@ -888,7 +888,7 @@
         <!-- Estado 1: esperando generación -->
         <div class="waiting-block" id="waitingBlock">
           <div class="spinner"></div>
-          <p class="waiting-title">¡Recibimos tu figurita!</p>
+          <p class="waiting-title">¡Recibimos tu figurita! 🎴</p>
           <p class="waiting-sub">
             Estamos generando tu figurita.<br>
             Aparece acá en unos segundos, ¡no cierres esta pantalla!
@@ -1366,11 +1366,14 @@
             msg = 'La conexión tardó demasiado. Revisá tu señal e intentá de nuevo.';
           } else if (!navigator.onLine) {
             msg = 'No hay conexión a internet. Reconectate e intentá de nuevo.';
+          } else if (err.message && (err.message.startsWith('DEBUG') || err.message.startsWith('Validación'))) {
+            // Mostrar el mensaje real del backend para diagnóstico
+            msg = err.message;
           } else if (err.message && err.message.startsWith('server_')) {
-            console.error('[submit] mensaje del backend:', err.message);
             msg = 'El servidor no está disponible. Intentá en unos segundos.';
+          } else {
+            msg += '\n\nSi el error persiste, avisá a un organizador del evento.';
           }
-          msg += '\n\nSi el error persiste, avisá a un organizador del evento.';
           errorBanner.textContent = msg;
           errorBanner.classList.add('visible');
           errorBanner.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1431,11 +1434,11 @@
         btnDownload.href = downloadUrl;
 
         // WhatsApp
-        const whatsappText = encodeURIComponent('¡Mirá mi figurita de Personal Pay! ' + shareUrl);
+        const whatsappText = encodeURIComponent('¡Mirá mi figurita de Personal Pay! 🎴 ' + shareUrl);
         btnWhatsapp.href = `https://wa.me/?text=${whatsappText}`;
 
         // Mail
-        const mailSubject = encodeURIComponent('Mi figurita de Personal Pay');
+        const mailSubject = encodeURIComponent('Mi figurita de Personal Pay 🎴');
         const mailBody = encodeURIComponent('¡Hola! Te comparto mi figurita de Personal Pay:\n\n' + shareUrl);
         btnMail.href = `mailto:?subject=${mailSubject}&body=${mailBody}`;
 
