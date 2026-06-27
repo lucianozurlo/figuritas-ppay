@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="es">
+
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Panel Mural — Personal Pay</title>
+        <style>
+            :root {
+                --c-bg: #F2F4F8;
+                --c-surface: #FFFFFF;
+                --c-brand: #5a50f9;
+                --c-brand-dk: #150958;
+                --c-accent: #d300ff;
+                --c-accent-dk: #69067d;
+                --c-text: #111827;
+                --c-muted: #6B7280;
+                --c-border: #D1D5DB;
+                --c-error: #DC2626;
+                --c-error-bg: #FEF2F2;
+                --radius: 18px;
+                --radius-sm: 12px;
+                --shadow: 0 2px 20px rgba(0, 0, 0, .07);
+            }
+
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: var(--c-bg);
+                color: var(--c-text);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 40px 16px 60px;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            .header {
+                text-align: center;
+                margin-bottom: 28px;
+            }
+
+            .header__eyebrow {
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: .14em;
+                text-transform: uppercase;
+                color: var(--c-brand);
+                margin-bottom: 8px;
+            }
+
+            .header__title {
+                font-size: 28px;
+                font-weight: 800;
+                line-height: 1.2;
+            }
+
+            .header__title mark {
+                background: none;
+                color: var(--c-brand);
+            }
+
+            .header__sub {
+                margin-top: 8px;
+                font-size: 14px;
+                color: var(--c-muted);
+            }
+
+            .card {
+                background: var(--c-surface);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                padding: 28px 24px 32px;
+                width: 100%;
+                max-width: 520px;
+            }
+
+            /* Estado badge */
+            .status-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 14px;
+                border-radius: 100px;
+                font-size: 13px;
+                font-weight: 700;
+                margin-bottom: 24px;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .status-badge.idle {
+                background: #F0FDF4;
+                color: #065F46;
+                border: 1.5px solid #86EFAC;
+            }
+
+            .status-badge.running {
+                background: #EFF6FF;
+                color: #1D4ED8;
+                border: 1.5px solid #93C5FD;
+            }
+
+            .status-badge.unknown {
+                background: var(--c-bg);
+                color: var(--c-muted);
+                border: 1.5px solid var(--c-border);
+            }
+
+            .status-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+            .idle .status-dot {
+                background: #22C55E;
+            }
+
+            .running .status-dot {
+                background: #3B82F6;
+                animation: pulse-dot 1.2s ease-in-out infinite;
+            }
+
+            .unknown .status-dot {
+                background: var(--c-border);
+            }
+
+            @keyframes pulse-dot {
+
+                0%,
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+
+                50% {
+                    opacity: .5;
+                    transform: scale(1.4);
+                }
+            }
+
+            /* Campos */
+            .field {
+                margin-bottom: 18px;
+            }
+
+            .field__label {
+                display: block;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: .08em;
+                text-transform: uppercase;
+                color: var(--c-muted);
+                margin-bottom: 7px;
+            }
+
+            .field__input {
+                width: 100%;
+                font-size: 15px;
+                padding: 13px 16px;
+                border-radius: var(--radius-sm);
+                border: 1.5px solid var(--c-border);
+                background: var(--c-surface);
+                color: var(--c-text);
+                outline: none;
+                font-family: inherit;
+                transition: border-color .15s;
+            }
+
+            .field__input:focus {
+                border-color: var(--c-brand);
+            }
+
+            .field__input::placeholder {
+                color: #9CA3AF;
+            }
+
+            .field__hint {
+                font-size: 12px;
+                color: var(--c-muted);
+                margin-top: 5px;
+            }
+
+            .field.is-error .field__input {
+                border-color: var(--c-error);
+                background: #FEF2F2;
+            }
+
+            .field__error {
+                display: none;
+                font-size: 12px;
+                color: var(--c-error);
+                font-weight: 500;
+                margin-top: 5px;
+            }
+
+            .field.is-error .field__error {
+                display: block;
+            }
+
+            /* Advertencia de sobreescritura */
+            .warn-banner {
+                display: none;
+                padding: 14px 16px;
+                border-radius: var(--radius-sm);
+                border: 1.5px solid var(--c-warn-br);
+                background: var(--c-warn-bg);
+                font-size: 13px;
+                color: #92400E;
+                line-height: 1.6;
+                margin-bottom: 18px;
+            }
+
+            .warn-banner.visible {
+                display: block;
+            }
+
+            .warn-banner strong {
+                display: block;
+                margin-bottom: 4px;
+                font-size: 14px;
+            }
+
+            /* Checkbox confirmar sobreescritura */
+            .confirm-overwrite {
+                display: none;
+                align-items: flex-start;
+                gap: 10px;
+                padding: 12px 14px;
+                border-radius: var(--radius-sm);
+                border: 1.5px solid var(--c-warn-br);
+                background: var(--c-warn-bg);
+                cursor: pointer;
+                margin-bottom: 18px;
+                -webkit-tap-highlight-color: transparent;
+                user-select: none;
+            }
+
+            .confirm-overwrite.visible {
+                display: flex;
+            }
+
+            .confirm-overwrite input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+                min-width: 20px;
+                accent-color: var(--c-warn);
+                margin-top: 1px;
+            }
+
+            .confirm-overwrite__text {
+                font-size: 13px;
+                color: #92400E;
+                line-height: 1.5;
+            }
+
+            /* Botón */
+            .btn-generar {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                width: 100%;
+                min-height: 54px;
+                padding: 16px;
+                border-radius: var(--radius-sm);
+                border: none;
+                background: var(--c-brand);
+                color: #fff;
+                font-size: 16px;
+                font-weight: 700;
+                font-family: inherit;
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+                transition: background .12s, opacity .12s;
+            }
+
+            .btn-generar:active:not(:disabled) {
+                background: var(--c-brand-dk);
+            }
+
+            .btn-generar:disabled {
+                background: var(--c-border);
+                color: var(--c-muted);
+                cursor: not-allowed;
+            }
+
+            .btn-generar svg {
+                width: 20px;
+                height: 20px;
+                flex-shrink: 0;
+            }
+
+            /* Spinner dentro del botón */
+            .btn-spinner {
+                width: 18px;
+                height: 18px;
+                border: 2.5px solid rgba(255, 255, 255, .4);
+                border-top-color: #fff;
+                border-radius: 50%;
+                animation: spin .7s linear infinite;
+                display: none;
+            }
+
+            .loading .btn-spinner {
+                display: block;
+            }
+
+            .loading .btn-icon {
+                display: none;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            /* Resultado */
+            .result {
+                display: none;
+                margin-top: 20px;
+                padding: 16px;
+                border-radius: var(--radius-sm);
+                font-size: 14px;
+                line-height: 1.6;
+            }
+
+            .result.ok {
+                background: #F0FDF4;
+                border: 1.5px solid #86EFAC;
+                color: #065F46;
+            }
+
+            .result.error {
+                background: #FEF2F2;
+                border: 1.5px solid #FCA5A5;
+                color: var(--c-error);
+            }
+
+            .result.visible {
+                display: block;
+            }
+
+            .result strong {
+                display: block;
+                font-size: 15px;
+                margin-bottom: 4px;
+            }
+
+            .divider {
+                border: none;
+                border-top: 1px solid var(--c-border);
+                margin: 24px 0;
+            }
+
+            .info-section {
+                font-size: 13px;
+                color: var(--c-muted);
+                line-height: 1.7;
+            }
+
+            .info-section strong {
+                color: var(--c-text);
+            }
+
+        </style>
+    </head>
+
+    <body>
+
+        <div class="header">
+            <img src="../../personal-logo.svg" style="height: 50px; margin-bottom: 10px;">
+            <h1 class="header__title">Tu Figurita<br><mark>Personal Pay</mark></h1>
+            <p class="header__sub">Generá y exportá el mural de figuritas</p>
+        </div>
+
+        <div class="card">
+
+            <!-- Estado actual -->
+            <div class="status-badge unknown" id="statusBadge">
+                <span class="status-dot"></span>
+                <span id="statusText">Verificando estado…</span>
+            </div>
+
+            <!-- Advertencia si hay mural en progreso -->
+            <div class="warn-banner" id="warnBanner">
+                <strong>⚠️ Hay un mural en proceso de generación</strong>
+                Si generás uno nuevo, el actual se interrumpirá y se sobreescribirá.
+                Confirmá que querés continuar.
+            </div>
+
+            <!-- Checkbox de confirmación -->
+            <label class="confirm-overwrite" id="confirmOverwrite">
+                <input type="checkbox" id="checkOverwrite" />
+                <span class="confirm-overwrite__text">
+                    Entiendo que el mural en proceso se sobreescribirá con una nueva generación.
+                </span>
+            </label>
+
+            <!-- Mail de notificación -->
+            <div class="field" id="fieldMail">
+                <label class="field__label" for="inputMail">📧 Mail para recibir notificación</label>
+                <input class="field__input" type="email" id="inputMail" placeholder="tu@mail.com" autocomplete="email"
+                    autocorrect="off" autocapitalize="none" inputmode="email" />
+                <p class="field__hint">Cuando el mural esté listo, te llega el link para descargar el PPTX, PDF y los
+                    PNGs.</p>
+                <p class="field__error">Ingresá un mail válido.</p>
+            </div>
+
+            <!-- Botón principal -->
+            <button type="button" class="btn-generar" id="btnGenerar">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <circle cx="8.5" cy="8.5" r="1.5" />
+                    <polyline points="21 15 16 10 5 21" />
+                </svg>
+                <div class="btn-spinner"></div>
+                Generar Mural
+            </button>
+
+            <!-- Resultado -->
+            <div class="result" id="result"></div>
+
+            <hr class="divider" />
+
+            <div class="info-section">
+                <strong>¿Qué pasa al generar?</strong><br>
+                El sistema toma todas las figuritas con consentimiento de mural,
+                las ordena aleatoriamente y las distribuye en slides de 84 figuritas cada una.<br><br>
+                <strong>¿Cuánto tarda?</strong><br>
+                Depende de la cantidad de figuritas. Con 300 figuritas, aproximadamente 10–15 minutos.
+                Te llega un mail cuando termine con los links de descarga.<br><br>
+                <strong>¿Qué recibís por mail?</strong><br>
+                Link a la carpeta con el mural en PPTX, PDF y un PNG por cada slide.
+            </div>
+
+        </div>
+
+        <script>
+            const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwb_blECxEBUJMKPtg1Oh82Zq3f-W1RBzpWKhOZaPq53uibZO55l4_CMMJMqu6irgvu/exec';
+
+            const statusBadge = document.getElementById('statusBadge');
+            const statusText = document.getElementById('statusText');
+            const warnBanner = document.getElementById('warnBanner');
+            const confirmOverwrite = document.getElementById('confirmOverwrite');
+            const checkOverwrite = document.getElementById('checkOverwrite');
+            const fieldMail = document.getElementById('fieldMail');
+            const inputMail = document.getElementById('inputMail');
+            const btnGenerar = document.getElementById('btnGenerar');
+            const result = document.getElementById('result');
+
+            let muralEnProceso = false;
+
+            // ── VERIFICAR ESTADO AL CARGAR ────────────────────────────
+            async function checkEstado() {
+                try {
+                    const r = await fetch(`${BACKEND_URL}?action=mural_status`);
+                    const data = await r.json();
+                    muralEnProceso = data.enProceso === true;
+                    actualizarUI();
+                } catch (_) {
+                    statusBadge.className = 'status-badge unknown';
+                    statusText.textContent = 'No se pudo verificar el estado';
+                }
+            }
+
+            function actualizarUI() {
+                if (muralEnProceso) {
+                    statusBadge.className = 'status-badge running';
+                    statusText.textContent = 'Mural generándose ahora…';
+                    warnBanner.classList.add('visible');
+                    confirmOverwrite.classList.add('visible');
+                } else {
+                    statusBadge.className = 'status-badge idle';
+                    statusText.textContent = 'Listo para generar';
+                    warnBanner.classList.remove('visible');
+                    confirmOverwrite.classList.remove('visible');
+                    checkOverwrite.checked = false;
+                }
+            }
+
+            // ── VALIDACIÓN ────────────────────────────────────────────
+            function validar() {
+                const mail = inputMail.value.trim();
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) {
+                    fieldMail.classList.add('is-error');
+                    return false;
+                }
+                fieldMail.classList.remove('is-error');
+
+                if (muralEnProceso && !checkOverwrite.checked) {
+                    confirmOverwrite.style.border = '1.5px solid var(--c-error)';
+                    return false;
+                }
+                confirmOverwrite.style.border = '';
+                return true;
+            }
+
+            inputMail.addEventListener('input', () => fieldMail.classList.remove('is-error'));
+
+            // ── GENERAR MURAL ─────────────────────────────────────────
+            btnGenerar.addEventListener('click', async () => {
+                result.className = 'result';
+                result.innerHTML = '';
+
+                if (!validar()) return;
+
+                btnGenerar.disabled = true;
+                btnGenerar.classList.add('loading');
+                btnGenerar.textContent = '';
+                btnGenerar.innerHTML = '<div class="btn-spinner"></div> Enviando…';
+
+                try {
+                    const mail = inputMail.value.trim();
+                    const overwrite = muralEnProceso && checkOverwrite.checked;
+                    const url = `${BACKEND_URL}?action=mural&mail=${encodeURIComponent(mail)}&overwrite=${overwrite}`;
+                    const r = await fetch(url);
+                    const data = await r.json();
+
+                    if (data.status === 'ok') {
+                        result.className = 'result ok visible';
+                        result.innerHTML = `
+            <strong>✅ Generación iniciada</strong>
+            Cuando el mural esté listo, vas a recibir un mail en
+            <strong>${mail}</strong> con los links para descargar
+            el PPTX, PDF y los PNGs de cada slide.
+          `;
+                        muralEnProceso = true;
+                        actualizarUI();
+                    } else {
+                        throw new Error(data.message || 'Error desconocido');
+                    }
+
+                } catch (err) {
+                    result.className = 'result error visible';
+                    result.innerHTML = `<strong>❌ Error</strong>${err.message}`;
+                } finally {
+                    btnGenerar.disabled = false;
+                    btnGenerar.classList.remove('loading');
+                    btnGenerar.innerHTML = `
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          <div class="btn-spinner"></div>
+          Generar Mural
+        `;
+                }
+            });
+
+            // Inicializar
+            checkEstado();
+        </script>
+
+    </body>
+
+</html>

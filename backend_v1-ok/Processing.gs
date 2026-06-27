@@ -19,6 +19,8 @@ function onOpen() {
     .addItem('Validar configuración',           'validarConfiguracion')
     .addItem('Crear triggers de tiempo',        'createTimeTriggers')
     .addItem('Eliminar todos los triggers',     'deleteAllTriggers')
+    .addSeparator()
+    .addItem('🖼️ Generar mural',              'generarMural')
     .addToUi();
 }
 
