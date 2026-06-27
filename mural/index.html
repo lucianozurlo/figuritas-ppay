@@ -497,28 +497,32 @@
                 }
             }
 
+            function setBtnLabel(texto) {
+                const label = btnGenerar.querySelector('.btn-label');
+                if (label) label.textContent = texto;
+            }
+
             function actualizarUI() {
-                // Badge de estado
                 if (estadoMural === 'running') {
                     statusBadge.className = 'status-badge running';
                     statusText.textContent = '⏳ Mural generándose ahora…';
                     warnBanner.classList.add('visible');
                     confirmOverwrite.classList.add('visible');
-                    btnGenerar.querySelector('.btn-label').textContent = 'Generar nuevo mural';
+                    setBtnLabel('Generar nuevo mural');
                 } else if (estadoMural === 'done') {
                     statusBadge.className = 'status-badge done';
                     statusText.textContent = '✅ Hay un mural generado';
                     warnBanner.classList.remove('visible');
                     confirmOverwrite.classList.remove('visible');
                     checkOverwrite.checked = false;
-                    btnGenerar.querySelector('.btn-label').textContent = 'Generar nuevo mural';
+                    setBtnLabel('Generar nuevo mural');
                 } else {
                     statusBadge.className = 'status-badge idle';
                     statusText.textContent = '🟢 Listo para generar';
                     warnBanner.classList.remove('visible');
                     confirmOverwrite.classList.remove('visible');
                     checkOverwrite.checked = false;
-                    btnGenerar.querySelector('.btn-label').textContent = 'Generar Mural';
+                    setBtnLabel('Generar Mural');
                 }
             }
 
@@ -581,15 +585,16 @@
                     btnGenerar.disabled = false;
                     btnGenerar.classList.remove('loading');
                     btnGenerar.innerHTML = `
-          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
-          </svg>
-          <div class="btn-spinner"></div>
-          Generar Mural
-        `;
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                        <div class="btn-spinner"></div>
+                        <span class="btn-label">Generar Mural</span>
+                    `;
+                    actualizarUI();
                 }
             });
 
