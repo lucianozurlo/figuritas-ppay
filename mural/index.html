@@ -9,15 +9,16 @@
             :root {
                 --c-bg: #F2F4F8;
                 --c-surface: #FFFFFF;
-                --c-brand: #5a50f9;
-                --c-brand-dk: #150958;
-                --c-accent: #d300ff;
-                --c-accent-dk: #69067d;
+                --c-brand: #0062FF;
+                --c-brand-dk: #0047CC;
+                --c-accent: #00C6A2;
                 --c-text: #111827;
                 --c-muted: #6B7280;
                 --c-border: #D1D5DB;
                 --c-error: #DC2626;
-                --c-error-bg: #FEF2F2;
+                --c-warn: #D97706;
+                --c-warn-bg: #FFFBEB;
+                --c-warn-br: #F59E0B;
                 --radius: 18px;
                 --radius-sm: 12px;
                 --shadow: 0 2px 20px rgba(0, 0, 0, .07);
@@ -109,6 +110,12 @@
                 border: 1.5px solid #93C5FD;
             }
 
+            .status-badge.done {
+                background: #F5F3FF;
+                color: #5B21B6;
+                border: 1.5px solid #C4B5FD;
+            }
+
             .status-badge.unknown {
                 background: var(--c-bg);
                 color: var(--c-muted);
@@ -129,6 +136,10 @@
             .running .status-dot {
                 background: #3B82F6;
                 animation: pulse-dot 1.2s ease-in-out infinite;
+            }
+
+            .done .status-dot {
+                background: #7C3AED;
             }
 
             .unknown .status-dot {
@@ -380,8 +391,8 @@
     <body>
 
         <div class="header">
-            <img src="../personal-logo.svg" style="height: 50px; margin-bottom: 10px;">
-            <h1 class="header__title">Tu Figurita<br><mark>Personal Pay</mark></h1>
+            <p class="header__eyebrow">Personal Pay · All Hands 2025</p>
+            <h1 class="header__title">Panel <mark>Mural</mark></h1>
             <p class="header__sub">Generá y exportá el mural de figuritas</p>
         </div>
 
@@ -427,7 +438,7 @@
                     <polyline points="21 15 16 10 5 21" />
                 </svg>
                 <div class="btn-spinner"></div>
-                Generar Mural
+                <span class="btn-label">Generar Mural</span>
             </button>
 
             <!-- Resultado -->
@@ -461,13 +472,21 @@
             const btnGenerar = document.getElementById('btnGenerar');
             const result = document.getElementById('result');
 
-            let muralEnProceso = false;
+            // Estado: 'idle' = sin mural, 'running' = generándose, 'done' = mural listo
+            let estadoMural = 'unknown';
 
             // ── VERIFICAR ESTADO AL CARGAR ────────────────────────────
             async function checkEstado() {
                 try {
                     const r = await fetch(`${BACKEND_URL}?action=mural_status`);
                     const data = await r.json();
+                    if (data.enProceso) {
+                        estadoMural = 'running';
+                    } else if (data.tieneMural) {
+                        estadoMural = 'done';
+                    } else {
+                        estadoMural = 'idle';
+                    }
                     muralEnProceso = data.enProceso === true;
                     actualizarUI();
                 } catch (_) {
@@ -477,17 +496,27 @@
             }
 
             function actualizarUI() {
-                if (muralEnProceso) {
+                // Badge de estado
+                if (estadoMural === 'running') {
                     statusBadge.className = 'status-badge running';
-                    statusText.textContent = 'Mural generándose ahora…';
+                    statusText.textContent = '⏳ Mural generándose ahora…';
                     warnBanner.classList.add('visible');
                     confirmOverwrite.classList.add('visible');
-                } else {
-                    statusBadge.className = 'status-badge idle';
-                    statusText.textContent = 'Listo para generar';
+                    btnGenerar.querySelector('.btn-label').textContent = 'Generar nuevo mural';
+                } else if (estadoMural === 'done') {
+                    statusBadge.className = 'status-badge done';
+                    statusText.textContent = '✅ Hay un mural generado';
                     warnBanner.classList.remove('visible');
                     confirmOverwrite.classList.remove('visible');
                     checkOverwrite.checked = false;
+                    btnGenerar.querySelector('.btn-label').textContent = 'Generar nuevo mural';
+                } else {
+                    statusBadge.className = 'status-badge idle';
+                    statusText.textContent = '🟢 Listo para generar';
+                    warnBanner.classList.remove('visible');
+                    confirmOverwrite.classList.remove('visible');
+                    checkOverwrite.checked = false;
+                    btnGenerar.querySelector('.btn-label').textContent = 'Generar Mural';
                 }
             }
 
