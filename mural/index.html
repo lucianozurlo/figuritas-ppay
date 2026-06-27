@@ -234,6 +234,12 @@
                 margin-bottom: 18px;
             }
 
+            .warn-banner--info {
+                border-color: #93C5FD;
+                background: #EFF6FF;
+                color: #1E40AF;
+            }
+
             .warn-banner.visible {
                 display: block;
             }
@@ -407,10 +413,17 @@
             </div>
 
             <!-- Advertencia si hay mural en progreso -->
+            <!-- Advertencia si hay mural en proceso -->
             <div class="warn-banner" id="warnBanner">
                 <strong>⚠️ Hay un mural en proceso de generación</strong>
                 Si generás uno nuevo, el actual se interrumpirá y se sobreescribirá.
                 Confirmá que querés continuar.
+            </div>
+
+            <!-- Banner de figuritas nuevas fuera del mural -->
+            <div class="warn-banner warn-banner--info" id="newFigsBanner">
+                <strong>🆕 Hay figuritas nuevas fuera del mural</strong>
+                <span id="newFigsText"></span>
             </div>
 
             <!-- Checkbox de confirmación -->
@@ -476,12 +489,19 @@
 
             // Estado: 'idle' = sin mural, 'running' = generándose, 'done' = mural listo
             let estadoMural = 'unknown';
+            let muralEnProceso = false;
+            let figuritasNuevas = 0;
+
+            const newFigsBanner = document.getElementById('newFigsBanner');
+            const newFigsText = document.getElementById('newFigsText');
 
             // ── VERIFICAR ESTADO AL CARGAR ────────────────────────────
             async function checkEstado() {
                 try {
                     const r = await fetch(`${BACKEND_URL}?action=mural_status`);
                     const data = await r.json();
+                    muralEnProceso = data.enProceso === true;
+                    figuritasNuevas = data.figuritasNuevas || 0;
                     if (data.enProceso) {
                         estadoMural = 'running';
                     } else if (data.tieneMural) {
@@ -489,7 +509,6 @@
                     } else {
                         estadoMural = 'idle';
                     }
-                    muralEnProceso = data.enProceso === true;
                     actualizarUI();
                 } catch (_) {
                     statusBadge.className = 'status-badge unknown';
@@ -503,6 +522,14 @@
             }
 
             function actualizarUI() {
+                // Banner de figuritas nuevas (solo cuando hay mural y hay nuevas)
+                if (estadoMural === 'done' && figuritasNuevas > 0) {
+                    newFigsText.textContent = `Hay ${figuritasNuevas} figurita${figuritasNuevas > 1 ? 's' : ''} nueva${figuritasNuevas > 1 ? 's' : ''} que no están en el mural actual. Generá un nuevo mural para incluirlas.`;
+                    newFigsBanner.classList.add('visible');
+                } else {
+                    newFigsBanner.classList.remove('visible');
+                }
+
                 if (estadoMural === 'running') {
                     statusBadge.className = 'status-badge running';
                     statusText.textContent = '⏳ Mural generándose ahora…';

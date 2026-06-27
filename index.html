@@ -918,8 +918,8 @@
           </div>
         </label>
 
-        <label class="consent-block" id="consentMural">
-          <input type="checkbox" id="checkMural" />
+        <label class="consent-block is-checked" id="consentMural">
+          <input type="checkbox" id="checkMural" checked />
           <div class="consent-block__body">
             <div class="consent-block__title">
               Quiero aparecer en el mural del evento
@@ -1638,8 +1638,10 @@
         document.getElementById('inputSuperpoder').value = '';
         document.getElementById('inputActitud').value = '';
         document.getElementById('checkGen').checked = false;
-        document.getElementById('checkMural').checked = false;
+        document.getElementById('checkMural').checked = true;
         document.querySelectorAll('.consent-block').forEach(b => b.classList.remove('is-checked'));
+        // El mural vuelve a quedar tildado por defecto
+        document.getElementById('consentMural').classList.add('is-checked');
 
         // Resetear foto
         fotoPreview.classList.remove('has-photo');
