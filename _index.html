@@ -7,15 +7,772 @@
     <meta name="theme-color" content="#0062FF" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <title>Mi Figurita Personal Pay</title>
-    <link rel="icon" href="../img/favicon.png" sizes="32x32">
+    <link rel="icon" href="./favicon.png" sizes="32x32">
     <meta name="robots" content="noindex">
-    <link rel="stylesheet" href="../css/styles.css">
+
+    <style>
+      :root {
+        --c-bg: #F2F4F8;
+        --c-surface: #FFFFFF;
+        --c-brand: #5a50f9;
+        --c-brand-dk: #150958;
+        --c-accent: #d300ff;
+        --c-accent-dk: #69067d;
+        --c-text: #111827;
+        --c-muted: #6B7280;
+        --c-border: #D1D5DB;
+        --c-error: #DC2626;
+        --c-error-bg: #FEF2F2;
+        --radius: 18px;
+        --radius-sm: 12px;
+        --shadow: 0 2px 20px rgba(0, 0, 0, .07);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--c-bg);
+        color: var(--c-text);
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 16px 60px;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      /* ─── HEADER ─────────────────────────────────────────── */
+      .header {
+        text-align: center;
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 460px;
+      }
+
+      .header__eyebrow {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: var(--c-brand);
+        margin-bottom: 10px;
+      }
+
+      .header__title {
+        font-size: clamp(24px, 7vw, 32px);
+        font-weight: 800;
+        line-height: 1.15;
+      }
+
+      .header__title mark {
+        background: none;
+        color: var(--c-brand);
+      }
+
+      .header__sub {
+        margin-top: 8px;
+        font-size: 14px;
+        color: var(--c-muted);
+        line-height: 1.5;
+      }
+
+      /* ─── CARD ───────────────────────────────────────────── */
+      .card {
+        background: var(--c-surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 24px 20px 28px;
+        width: 100%;
+        max-width: 460px;
+      }
+
+      /* ─── FOTO ───────────────────────────────────────────── */
+      .foto-section {
+        margin-bottom: 24px;
+      }
+
+      .foto-section__label {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--c-muted);
+        margin: 0 auto 14px;
+      }
+
+      .foto-preview {
+        position: relative;
+        width: 100%;
+        max-width: 240px;
+        margin: 0 auto 12px;
+        aspect-ratio: 1 / 1;
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--c-bg);
+        border: 2px dashed var(--c-border);
+      }
+
+      .foto-preview.has-photo {
+        border-style: solid;
+        border-color: var(--c-accent);
+      }
+
+      .foto-preview__canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: none;
+      }
+
+      .foto-preview.has-photo .foto-preview__canvas {
+        display: block;
+      }
+
+      .foto-preview__empty {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 16px;
+        text-align: center;
+        pointer-events: none;
+      }
+
+      .foto-preview.has-photo .foto-preview__empty {
+        display: none;
+      }
+
+      .foto-preview__empty-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #EEF2FF;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .foto-preview__empty-icon svg {
+        width: 24px;
+        height: 24px;
+      }
+
+      .foto-preview__empty-text {
+        font-size: 13px;
+        color: var(--c-muted);
+        line-height: 1.4;
+      }
+
+      .foto-btns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .foto-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 48px;
+        padding: 12px 8px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--c-border);
+        background: var(--c-surface);
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--c-text);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        transition: background .12s, border-color .12s;
+        font-family: inherit;
+      }
+
+      .foto-btn:active {
+        background: #EEF2FF;
+        border-color: var(--c-brand);
+      }
+
+      .foto-btn svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+
+      .foto-btn--change {
+        grid-column: 1 / -1;
+        border-color: var(--c-accent);
+        color: #065F46;
+        background: #F0FDF4;
+        display: none;
+      }
+
+      .foto-preview.has-photo~.foto-btns .foto-btn--change {
+        display: flex;
+      }
+
+      .foto-preview.has-photo~.foto-btns .foto-btn:not(.foto-btn--change) {
+        font-size: 13px;
+        min-height: 40px;
+        padding: 9px 8px;
+        color: var(--c-muted);
+      }
+
+      /* El botón de cámara se oculta en desktop via JS (clase desktop-mode) */
+      .desktop-mode .foto-btn--mobile-only {
+        display: none !important;
+      }
+
+      /* En desktop, la galería ocupa todo el ancho */
+      .desktop-mode.foto-btns {
+        grid-template-columns: 1fr;
+      }
+
+      .foto-error {
+        display: none;
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--c-error);
+        font-weight: 500;
+      }
+
+      .foto-error.visible {
+        display: block;
+      }
+
+      #inputCamera,
+      #inputGallery {
+        display: none;
+      }
+
+      /* ─── CAMPOS ─────────────────────────────────────────── */
+      .field {
+        margin-bottom: 16px;
+      }
+
+      .field__label {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--c-muted);
+        margin: 18px auto 14px;
+      }
+
+      .field__input,
+      .field__select {
+        width: 100%;
+        font-size: 16px;
+        padding: 14px 16px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--c-border);
+        background: var(--c-surface);
+        color: var(--c-text);
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+        transition: border-color .15s;
+        font-family: inherit;
+      }
+
+      .field__input:focus,
+      .field__select:focus {
+        border-color: var(--c-brand);
+      }
+
+      .field__input::placeholder {
+        color: #9CA3AF;
+      }
+
+      .field__footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-top: 5px;
+        min-height: 18px;
+      }
+
+      .field__hint {
+        font-size: 12px;
+        color: var(--c-muted);
+      }
+
+      .field__counter {
+        font-size: 12px;
+        color: var(--c-muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .field__counter.near-limit {
+        color: #D97706;
+      }
+
+      .field__counter.at-limit {
+        color: var(--c-error);
+      }
+
+      .field__error {
+        display: none;
+        font-size: 12px;
+        color: var(--c-error);
+        font-weight: 500;
+        margin-top: 5px;
+      }
+
+      .field.is-error .field__input,
+      .field.is-error .field__select {
+        border-color: var(--c-error);
+        background: var(--c-error-bg);
+      }
+
+      .field.is-error .field__error {
+        display: block;
+      }
+
+      .field__select-wrap {
+        position: relative;
+      }
+
+      .field__select-wrap::after {
+        content: '';
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 6px solid var(--c-muted);
+      }
+
+      /* ─── DIVIDER ────────────────────────────────────────── */
+      .divider {
+        border: none;
+        border-top: 1px solid var(--c-border);
+        margin: 20px 0;
+      }
+
+      /* ─── CONSENTIMIENTO ─────────────────────────────────── */
+      .consent-block {
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        padding: 14px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--c-border);
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        transition: border-color .15s, background .15s;
+        margin-bottom: 10px;
+      }
+
+      .consent-block--required {
+        background: #EEF2FF;
+        border-color: #C7D2FE;
+      }
+
+      .consent-block.is-checked {
+        border-color: var(--c-accent);
+        background: #F0FDF4;
+      }
+
+      .consent-block.is-error {
+        border-color: var(--c-error);
+        background: var(--c-error-bg);
+      }
+
+      .consent-block input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        margin-top: 0;
+        accent-color: var(--c-accent);
+        cursor: pointer;
+      }
+
+      .consent-block__body {
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--c-text);
+      }
+
+      .consent-block__title {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+        font-weight: 700;
+        font-size: 13px;
+        margin-bottom: 3px;
+      }
+
+      .badge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .05em;
+        text-transform: uppercase;
+        padding: 2px 7px;
+        border-radius: 4px;
+      }
+
+      .badge--req {
+        background: #DBEAFE;
+        color: #1D4ED8;
+      }
+
+      .badge--opt {
+        background: #D1FAE5;
+        color: #065F46;
+      }
+
+      /* ─── SUBMIT ─────────────────────────────────────────── */
+      .btn-submit {
+        display: block;
+        width: 100%;
+        min-height: 54px;
+        padding: 16px;
+        margin-top: 20px;
+        border-radius: var(--radius-sm);
+        border: none;
+        background: var(--c-brand);
+        color: #fff;
+        font-size: 17px;
+        font-weight: 700;
+        font-family: inherit;
+        letter-spacing: .01em;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        transition: background .12s;
+      }
+
+      .btn-submit:active:not(:disabled) {
+        background: var(--c-brand-dk);
+      }
+
+      .btn-submit:disabled {
+        background: var(--c-border);
+        color: var(--c-muted);
+        cursor: not-allowed;
+      }
+
+      /* ─── PROGRESO ───────────────────────────────────────── */
+      .progress {
+        display: none;
+        margin-top: 16px;
+      }
+
+      .progress.visible {
+        display: block;
+      }
+
+      .progress__bar {
+        width: 100%;
+        height: 5px;
+        border-radius: 3px;
+        background: var(--c-bg);
+        overflow: hidden;
+        margin-bottom: 10px;
+      }
+
+      .progress__fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 3px;
+        background: linear-gradient(90deg, var(--c-brand), var(--c-accent));
+        transition: width .35s ease;
+      }
+
+      .progress__label {
+        font-size: 14px;
+        color: var(--c-muted);
+        text-align: center;
+      }
+
+      /* ─── ERROR BANNER ───────────────────────────────────── */
+      .error-banner {
+        display: none;
+        margin-top: 14px;
+        padding: 14px 16px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--c-error);
+        background: var(--c-error-bg);
+        font-size: 14px;
+        color: var(--c-error);
+        line-height: 1.5;
+      }
+
+      .error-banner.visible {
+        display: block;
+      }
+
+      /* ─── PANTALLA DE ÉXITO ──────────────────────────────── */
+      .success-screen {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0;
+      }
+
+      .success-screen.visible {
+        display: flex;
+      }
+
+      /* Spinner de espera */
+      .waiting-block {
+        padding: 24px 0 8px;
+        width: 100%;
+      }
+
+      .waiting-block.hidden {
+        display: none;
+      }
+
+      .spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid var(--c-border);
+        border-top-color: var(--c-brand);
+        border-radius: 50%;
+        animation: spin .8s linear infinite;
+        margin: 0 auto 16px;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .waiting-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+
+      .waiting-sub {
+        font-size: 14px;
+        color: var(--c-muted);
+        line-height: 1.5;
+      }
+
+      .poll-dots {
+        display: inline-flex;
+        gap: 4px;
+        margin-top: 16px;
+      }
+
+      .poll-dots span {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--c-border);
+        animation: pulse 1.2s ease-in-out infinite;
+      }
+
+      .poll-dots span:nth-child(2) {
+        animation-delay: .2s;
+      }
+
+      .poll-dots span:nth-child(3) {
+        animation-delay: .4s;
+      }
+
+      @keyframes pulse {
+
+        0%,
+        100% {
+          background: var(--c-border);
+          transform: scale(1);
+        }
+
+        50% {
+          background: var(--c-brand);
+          transform: scale(1.3);
+        }
+      }
+
+      /* Figurita lista */
+      .figurita-block {
+        width: 100%;
+        padding-top: 8px;
+      }
+
+      .figurita-block.hidden {
+        display: none;
+      }
+
+      .figurita-block__check {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: var(--c-accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 14px;
+      }
+
+      .figurita-block__check svg {
+        width: 32px;
+        height: 32px;
+        fill: #fff;
+      }
+
+      .figurita-block__title {
+        font-size: 22px;
+        font-weight: 800;
+        margin-bottom: 4px;
+      }
+
+      .figurita-block__sub {
+        font-size: 14px;
+        color: var(--c-muted);
+        margin-bottom: 20px;
+        line-height: 1.5;
+      }
+
+      /* Imagen de la figurita generada */
+      .figurita-img-wrap {
+        width: 100%;
+        max-width: 420px;
+        margin: 0 auto 24px;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .12);
+        background: var(--c-bg);
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .figurita-img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      /* Botones de acción */
+      .action-btns {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 52px;
+        padding: 14px 20px;
+        border-radius: var(--radius-sm);
+        border: none;
+        font-size: 16px;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        text-decoration: none;
+        -webkit-tap-highlight-color: transparent;
+        transition: opacity .12s;
+      }
+
+      .action-btn:active {
+        opacity: .85;
+      }
+
+      .action-btn svg {
+        width: 22px;
+        height: 22px;
+        flex-shrink: 0;
+      }
+
+      .action-btn--download {
+        background: var(--c-brand);
+        color: #fff;
+      }
+
+      .action-btn--share {
+        background: var(--c-accent);
+        color: #fff;
+      }
+
+      .action-btn--again {
+        background: var(--c-surface);
+        color: var(--c-text);
+        border: 1.5px solid var(--c-border);
+      }
+
+      .action-btn--whatsapp {
+        background: #25D366;
+        color: #fff;
+      }
+
+      .action-btn--mail {
+        background: var(--c-surface);
+        color: var(--c-text);
+        border: 1.5px solid var(--c-border);
+      }
+
+      /* WhatsApp y Mail se ocultan por defecto; JS los muestra solo en desktop */
+      .action-btn--whatsapp,
+      .action-btn--mail {
+        display: none;
+      }
+
+      /* Aviso de sobrescritura cuando el mail ya tiene figurita */
+      .warn-banner {
+        display: none;
+        margin-top: 8px;
+        padding: 12px 14px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid #F59E0B;
+        background: #FFFBEB;
+        font-size: 13px;
+        color: #92400E;
+        line-height: 1.5;
+      }
+
+      .warn-banner.visible {
+        display: block;
+      }
+
+      .success-footer {
+        margin-top: 20px;
+        font-size: 12px;
+        color: var(--c-muted);
+        line-height: 1.5;
+        padding-bottom: 4px;
+      }
+
+    </style>
   </head>
 
-  <body class="page-figurita">
+  <body>
 
     <header class="header">
-      <img src="../img/personal-logo.svg" class="header__logo">
+      <img src="./personal-logo.svg" style="height: 50px; margin-bottom: 10px;">
       <h1 class="header__title">Tu Figurita<br><mark>Personal Pay</mark></h1>
       <p class="header__sub">Completá tus datos, sacate una foto y listo. Tu figurita aparece en minutos.</p>
     </header>
@@ -933,7 +1690,7 @@
         // Si el polling agotó el tiempo, mostrar éxito sin imagen
         // La figurita igual llega por mail
         waitingBlock.innerHTML = `
-        <div class="figurita-block__check figurita-block__check--inline">
+        <div class="figurita-block__check" style="margin:0 auto 16px">
           <svg viewBox="0 0 24 24" fill="white" width="32" height="32">
             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
           </svg>

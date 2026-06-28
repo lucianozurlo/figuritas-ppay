@@ -5,12 +5,188 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Borrar Figuritas y Murales — Personal Pay</title>
-    <link rel="icon" href="../img/faviconX.png" sizes="32x32">
+    <link rel="icon" href="../favicon.png" sizes="32x32">
     <meta name="robots" content="noindex">
-    <link rel="stylesheet" href="../css/styles.css">
+
+    <style>
+      :root {
+        --c-bg: #F2F4F8;
+        --c-surface: #FFFFFF;
+        --c-text: #111827;
+        --c-muted: #6B7280;
+        --c-border: #D1D5DB;
+        --c-error: #DC2626;
+        --c-error-bg: #FEF2F2;
+        --radius: 18px;
+        --radius-sm: 12px;
+        --shadow: 0 2px 20px rgba(0, 0, 0, .07);
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--c-bg);
+        color: var(--c-text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 16px 60px;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 28px;
+      }
+
+      .header__eyebrow {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: var(--c-error);
+        margin-bottom: 8px;
+      }
+
+      .header__title {
+        font-size: 26px;
+        font-weight: 800;
+      }
+
+      .header__sub {
+        margin-top: 8px;
+        font-size: 14px;
+        color: var(--c-muted);
+      }
+
+      .card {
+        background: var(--c-surface);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 28px 24px 32px;
+        width: 100%;
+        max-width: 480px;
+      }
+
+      .reset-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 18px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--c-border);
+        margin-bottom: 14px;
+      }
+
+      .reset-item__title {
+        font-size: 15px;
+        font-weight: 700;
+      }
+
+      .reset-item__desc {
+        font-size: 13px;
+        color: var(--c-muted);
+        line-height: 1.5;
+      }
+
+      .reset-item__footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 4px;
+      }
+
+      .reset-item__status {
+        font-size: 12px;
+        color: var(--c-muted);
+        min-height: 16px;
+      }
+
+      .reset-item__status.ok {
+        color: #065F46;
+      }
+
+      .reset-item__status.error {
+        color: var(--c-error);
+      }
+
+      .reset-item__status.loading {
+        color: #1D4ED8;
+      }
+
+      .btn-reset {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 16px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--c-error);
+        background: var(--c-error-bg);
+        color: var(--c-error);
+        font-size: 13px;
+        font-weight: 700;
+        font-family: inherit;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+        white-space: nowrap;
+        transition: background .12s;
+      }
+
+      .btn-reset:hover {
+        background: #FEE2E2;
+      }
+
+      .btn-reset:active {
+        background: #FECACA;
+      }
+
+      .btn-reset:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+      }
+
+      .btn-reset svg {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+      }
+
+      .divider {
+        border: none;
+        border-top: 1px solid var(--c-border);
+        margin: 8px 0 20px;
+      }
+
+      .warn {
+        padding: 14px 16px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid #F59E0B;
+        background: #FFFBEB;
+        font-size: 13px;
+        color: #92400E;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+
+      .warn strong {
+        display: block;
+        margin-bottom: 3px;
+        font-size: 14px;
+      }
+
+    </style>
   </head>
 
-  <body class="page-reset">
+  <body>
 
     <div class="header">
       <p class="header__eyebrow">⚠️ Zona de administración</p>

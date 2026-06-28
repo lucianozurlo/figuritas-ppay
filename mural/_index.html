@@ -5,14 +5,499 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Panel Mural — Personal Pay</title>
-        <link rel="icon" href="../img/favicon.png" sizes="32x32">
-        <link rel="stylesheet" href="../css/styles.css">
+        <link rel="icon" href="../favicon.png" sizes="32x32">
+        <style>
+            :root {
+                --c-bg: #F2F4F8;
+                --c-surface: #FFFFFF;
+                --c-brand: #5a50f9;
+                --c-brand-dk: #150958;
+                --c-accent: #d300ff;
+                --c-accent-dk: #69067d;
+                --c-text: #111827;
+                --c-muted: #6B7280;
+                --c-border: #D1D5DB;
+                --c-error: #DC2626;
+                --c-warn: #D97706;
+                --c-warn-bg: #FFFBEB;
+                --c-warn-br: #F59E0B;
+                --radius: 18px;
+                --radius-sm: 12px;
+                --shadow: 0 2px 20px rgba(0, 0, 0, .07);
+            }
+
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: var(--c-bg);
+                color: var(--c-text);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 40px 16px 60px;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            .header {
+                text-align: center;
+                margin-bottom: 28px;
+            }
+
+            .header__eyebrow {
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: .14em;
+                text-transform: uppercase;
+                color: var(--c-brand);
+                margin-bottom: 8px;
+            }
+
+            .header__title {
+                font-size: 28px;
+                font-weight: 800;
+                line-height: 1.2;
+            }
+
+            .header__title mark {
+                background: none;
+                color: var(--c-brand);
+            }
+
+            .header__sub {
+                margin-top: 8px;
+                font-size: 14px;
+                color: var(--c-muted);
+            }
+
+            .card {
+                background: var(--c-surface);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                padding: 28px 24px 32px;
+                width: 100%;
+                max-width: 520px;
+            }
+
+            /* Estado badge */
+            .status-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                padding: 8px 14px;
+                border-radius: 100px;
+                font-size: 13px;
+                font-weight: 700;
+                margin-bottom: 24px;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .status-badge.idle {
+                background: #F0FDF4;
+                color: #065F46;
+                border: 1.5px solid #86EFAC;
+            }
+
+            .status-badge.running {
+                background: #EFF6FF;
+                color: #1D4ED8;
+                border: 1.5px solid #93C5FD;
+            }
+
+            .status-badge.done {
+                background: #F5F3FF;
+                color: #5B21B6;
+                border: 1.5px solid #C4B5FD;
+            }
+
+            .status-badge.unknown {
+                background: var(--c-bg);
+                color: var(--c-muted);
+                border: 1.5px solid var(--c-border);
+            }
+
+            .status-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+            .idle .status-dot {
+                background: #22C55E;
+            }
+
+            .running .status-dot {
+                background: #3B82F6;
+                animation: pulse-dot 1.2s ease-in-out infinite;
+            }
+
+            .done .status-dot {
+                background: #7C3AED;
+            }
+
+            .unknown .status-dot {
+                background: var(--c-border);
+            }
+
+            @keyframes pulse-dot {
+
+                0%,
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+
+                50% {
+                    opacity: .5;
+                    transform: scale(1.4);
+                }
+            }
+
+            /* Campos */
+            .field {
+                margin-bottom: 18px;
+            }
+
+            .field__label {
+                display: block;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: .08em;
+                text-transform: uppercase;
+                color: var(--c-muted);
+                margin-bottom: 7px;
+            }
+
+            .field__input {
+                width: 100%;
+                font-size: 15px;
+                padding: 13px 16px;
+                border-radius: var(--radius-sm);
+                border: 1.5px solid var(--c-border);
+                background: var(--c-surface);
+                color: var(--c-text);
+                outline: none;
+                font-family: inherit;
+                transition: border-color .15s;
+            }
+
+            .field__input:focus {
+                border-color: var(--c-brand);
+            }
+
+            .field__input::placeholder {
+                color: #9CA3AF;
+            }
+
+            .field__hint {
+                font-size: 12px;
+                color: var(--c-muted);
+                margin-top: 5px;
+            }
+
+            .field.is-error .field__input {
+                border-color: var(--c-error);
+                background: #FEF2F2;
+            }
+
+            .field__error {
+                display: none;
+                font-size: 12px;
+                color: var(--c-error);
+                font-weight: 500;
+                margin-top: 5px;
+            }
+
+            .field.is-error .field__error {
+                display: block;
+            }
+
+            /* Advertencia de sobreescritura */
+            .warn-banner {
+                display: none;
+                padding: 14px 16px;
+                border-radius: var(--radius-sm);
+                border: 1.5px solid var(--c-warn-br);
+                background: var(--c-warn-bg);
+                font-size: 13px;
+                color: #92400E;
+                line-height: 1.6;
+                margin-bottom: 18px;
+            }
+
+            .warn-banner--info {
+                border-color: #93C5FD;
+                background: #EFF6FF;
+                color: #1E40AF;
+            }
+
+            .warn-banner.visible {
+                display: block;
+            }
+
+            .warn-banner strong {
+                display: block;
+                margin-bottom: 4px;
+                font-size: 14px;
+            }
+
+            /* Checkbox confirmar sobreescritura */
+            .confirm-overwrite {
+                display: none;
+                align-items: flex-start;
+                gap: 10px;
+                padding: 12px 14px;
+                border-radius: var(--radius-sm);
+                border: 1.5px solid var(--c-warn-br);
+                background: var(--c-warn-bg);
+                cursor: pointer;
+                margin-bottom: 18px;
+                -webkit-tap-highlight-color: transparent;
+                user-select: none;
+            }
+
+            .confirm-overwrite.visible {
+                display: flex;
+            }
+
+            .confirm-overwrite input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+                min-width: 20px;
+                accent-color: var(--c-warn);
+                margin-top: 1px;
+            }
+
+            .confirm-overwrite__text {
+                font-size: 13px;
+                color: #92400E;
+                line-height: 1.5;
+            }
+
+            /* Botón */
+            .btn-generar {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                width: 100%;
+                min-height: 54px;
+                padding: 16px;
+                border-radius: var(--radius-sm);
+                border: none;
+                background: var(--c-brand);
+                color: #fff;
+                font-size: 16px;
+                font-weight: 700;
+                font-family: inherit;
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+                transition: background .12s, opacity .12s;
+            }
+
+            .btn-generar:active:not(:disabled) {
+                background: var(--c-brand-dk);
+            }
+
+            .btn-generar:disabled {
+                background: var(--c-border);
+                color: var(--c-muted);
+                cursor: not-allowed;
+            }
+
+            .btn-generar svg {
+                width: 20px;
+                height: 20px;
+                flex-shrink: 0;
+            }
+
+            /* Spinner dentro del botón */
+            .btn-spinner {
+                width: 18px;
+                height: 18px;
+                border: 2.5px solid rgba(255, 255, 255, .4);
+                border-top-color: #fff;
+                border-radius: 50%;
+                animation: spin .7s linear infinite;
+                display: none;
+            }
+
+            .loading .btn-spinner {
+                display: block;
+            }
+
+            .loading .btn-icon {
+                display: none;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            /* Resultado */
+            .result {
+                display: none;
+                margin-top: 20px;
+                padding: 16px;
+                border-radius: var(--radius-sm);
+                font-size: 14px;
+                line-height: 1.6;
+            }
+
+            .result.ok {
+                background: #F0FDF4;
+                border: 1.5px solid #86EFAC;
+                color: #065F46;
+            }
+
+            .result.error {
+                background: #FEF2F2;
+                border: 1.5px solid #FCA5A5;
+                color: var(--c-error);
+            }
+
+            .result.visible {
+                display: block;
+            }
+
+            .result strong {
+                display: block;
+                font-size: 15px;
+                margin-bottom: 4px;
+            }
+
+            .divider {
+                border: none;
+                border-top: 1px solid var(--c-border);
+                margin: 24px 0;
+            }
+
+            .info-section {
+                font-size: 13px;
+                color: var(--c-muted);
+                line-height: 1.7;
+            }
+
+            .info-section strong {
+                color: var(--c-text);
+            }
+
+            /* Último mural generado */
+            .ultimo-mural {
+                display: none;
+                margin-top: 20px;
+                padding: 16px;
+                border-radius: var(--radius-sm);
+                border: 1.5px solid #C4B5FD;
+                background: #F5F3FF;
+            }
+
+            .ultimo-mural.visible {
+                display: block;
+            }
+
+            .ultimo-mural__titulo {
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                color: #5B21B6;
+                margin-bottom: 10px;
+            }
+
+            .ultimo-mural__meta {
+                font-size: 13px;
+                color: var(--c-muted);
+                margin-bottom: 12px;
+                line-height: 1.6;
+            }
+
+            .ultimo-mural__meta strong {
+                color: var(--c-text);
+            }
+
+            .mural-links {
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+            }
+
+            .mural-link {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 9px 13px;
+                border-radius: var(--radius-sm);
+                background: var(--c-surface);
+                border: 1.5px solid #C4B5FD;
+                font-size: 13px;
+                font-weight: 600;
+                color: #5B21B6;
+                text-decoration: none;
+                transition: background .12s;
+            }
+
+            .mural-link:hover {
+                background: #EDE9FE;
+            }
+
+            .mural-link svg {
+                width: 15px;
+                height: 15px;
+                flex-shrink: 0;
+            }
+
+            .mural-link--folder {
+                color: var(--c-muted);
+                border-color: var(--c-border);
+                font-weight: 400;
+            }
+
+            .pngs-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+                margin-top: 8px;
+            }
+
+            .png-link {
+                font-size: 11px;
+                color: #5B21B6;
+                text-decoration: none;
+                padding: 3px 8px;
+                border-radius: 6px;
+                background: var(--c-surface);
+                border: 1px solid #C4B5FD;
+            }
+
+            .png-link:hover {
+                background: #EDE9FE;
+            }
+
+            .png-label {
+                font-size: 12px;
+                color: var(--c-muted);
+                margin-bottom: 4px;
+            }
+
+        </style>
     </head>
 
-    <body class="page-mural">
+    <body>
 
         <div class="header">
-            <img src="../img/personal-logo.svg" class="header__logo">
+            <img src="../personal-logo.svg" style="height: 50px; margin-bottom: 10px;">
             <h1 class="header__title">Tu Figurita<br><mark>Personal Pay</mark></h1>
             <p class="header__sub">Generá y exportá el mural de figuritas</p>
         </div>
