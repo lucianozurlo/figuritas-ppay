@@ -393,6 +393,104 @@
                 color: var(--c-text);
             }
 
+            /* Último mural generado */
+            .ultimo-mural {
+                display: none;
+                margin-top: 20px;
+                padding: 16px;
+                border-radius: var(--radius-sm);
+                border: 1.5px solid #C4B5FD;
+                background: #F5F3FF;
+            }
+
+            .ultimo-mural.visible {
+                display: block;
+            }
+
+            .ultimo-mural__titulo {
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .08em;
+                color: #5B21B6;
+                margin-bottom: 10px;
+            }
+
+            .ultimo-mural__meta {
+                font-size: 13px;
+                color: var(--c-muted);
+                margin-bottom: 12px;
+                line-height: 1.6;
+            }
+
+            .ultimo-mural__meta strong {
+                color: var(--c-text);
+            }
+
+            .mural-links {
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+            }
+
+            .mural-link {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 9px 13px;
+                border-radius: var(--radius-sm);
+                background: var(--c-surface);
+                border: 1.5px solid #C4B5FD;
+                font-size: 13px;
+                font-weight: 600;
+                color: #5B21B6;
+                text-decoration: none;
+                transition: background .12s;
+            }
+
+            .mural-link:hover {
+                background: #EDE9FE;
+            }
+
+            .mural-link svg {
+                width: 15px;
+                height: 15px;
+                flex-shrink: 0;
+            }
+
+            .mural-link--folder {
+                color: var(--c-muted);
+                border-color: var(--c-border);
+                font-weight: 400;
+            }
+
+            .pngs-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+                margin-top: 8px;
+            }
+
+            .png-link {
+                font-size: 11px;
+                color: #5B21B6;
+                text-decoration: none;
+                padding: 3px 8px;
+                border-radius: 6px;
+                background: var(--c-surface);
+                border: 1px solid #C4B5FD;
+            }
+
+            .png-link:hover {
+                background: #EDE9FE;
+            }
+
+            .png-label {
+                font-size: 12px;
+                color: var(--c-muted);
+                margin-bottom: 4px;
+            }
+
         </style>
     </head>
 
@@ -461,6 +559,15 @@
 
             <hr class="divider" />
 
+            <!-- Último mural generado -->
+            <div class="ultimo-mural" id="ultimoMural">
+                <p class="ultimo-mural__titulo">📦 Último mural generado</p>
+                <p class="ultimo-mural__meta" id="ultimoMuralMeta"></p>
+                <div class="mural-links" id="muralLinks"></div>
+            </div>
+
+            <hr class="divider" id="dividerInfo" />
+
             <div class="info-section">
                 <strong>¿Qué pasa al generar?</strong><br>
                 El sistema toma todas las figuritas con consentimiento de mural,
@@ -486,6 +593,9 @@
             const inputMail = document.getElementById('inputMail');
             const btnGenerar = document.getElementById('btnGenerar');
             const result = document.getElementById('result');
+            const ultimoMuralEl = document.getElementById('ultimoMural');
+            const ultimoMuralMeta = document.getElementById('ultimoMuralMeta');
+            const muralLinksEl = document.getElementById('muralLinks');
 
             // Estado: 'idle' = sin mural, 'running' = generándose, 'done' = mural listo
             let estadoMural = 'unknown';
@@ -511,11 +621,73 @@
                     } else {
                         estadoMural = 'idle';
                     }
+                    renderUltimoMural(data.ultimoMural);
                     actualizarUI();
                 } catch (_) {
                     statusBadge.className = 'status-badge unknown';
                     statusText.textContent = 'No se pudo verificar el estado';
                 }
+            }
+
+            function renderUltimoMural(data) {
+                if (!data) {
+                    ultimoMuralEl.classList.remove('visible');
+                    return;
+                }
+                ultimoMuralEl.classList.add('visible');
+
+                // Meta: versión y fecha
+                ultimoMuralMeta.innerHTML =
+                    `<strong>${data.version}</strong> — ${data.fecha}`;
+
+                // Links
+                let html = '<div class="mural-links">';
+
+                // Carpeta
+                if (data.carpetaUrl) {
+                    html += `<a class="mural-link mural-link--folder" href="${data.carpetaUrl}" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        Abrir carpeta en Drive
+                    </a>`;
+                }
+
+                // PPTX
+                if (data.pptxUrl) {
+                    html += `<a class="mural-link" href="${data.pptxUrl}" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Descargar PPTX
+                    </a>`;
+                }
+
+                // PDF
+                if (data.pdfUrl) {
+                    html += `<a class="mural-link" href="${data.pdfUrl}" target="_blank" rel="noopener">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Descargar PDF
+                    </a>`;
+                }
+
+                // PNGs
+                if (data.pngs && data.pngs.length > 0) {
+                    html += `<div>
+                        <p class="png-label">PNGs por slide (${data.pngs.length}):</p>
+                        <div class="pngs-list">`;
+                    data.pngs.forEach((png, i) => {
+                        html += `<a class="png-link" href="${png.url}" target="_blank" rel="noopener">Slide ${String(i + 1).padStart(2, '0')}</a>`;
+                    });
+                    html += `</div></div>`;
+                }
+
+                html += '</div>';
+                muralLinksEl.innerHTML = html;
             }
 
             function setBtnLabel(texto) {
