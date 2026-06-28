@@ -199,16 +199,17 @@
         Usarlas solo en pruebas o para limpiar antes del evento.
       </div>
 
-      <!-- Fotos originales -->
-      <div class="reset-item" id="itemFotos">
-        <p class="reset-item__title">📷 Fotos originales</p>
+      <!-- Fotos + Figuritas + Registros -->
+      <div class="reset-item" id="itemTodo">
+        <p class="reset-item__title">🗑️ Resetear todo</p>
         <p class="reset-item__desc">
-          Elimina todos los archivos de la carpeta <strong>00_Fotos_Originales</strong>.
-          No afecta las figuritas ya generadas.
+          Elimina los archivos de <strong>00_Fotos_Originales</strong> y
+          <strong>03_Figuritas_Generadas</strong>, y borra todos los registros
+          del Sheet. El sistema queda limpio como el primer día.
         </p>
         <div class="reset-item__footer">
-          <span class="reset-item__status" id="statusFotos"></span>
-          <button class="btn-reset" id="btnFotos" onclick="confirmarReset('fotos')">
+          <span class="reset-item__status" id="statusTodo"></span>
+          <button class="btn-reset" id="btnTodo" onclick="confirmarReset('todo')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
               stroke-linejoin="round">
               <polyline points="3 6 5 6 21 6" />
@@ -216,29 +217,7 @@
               <path d="M10 11v6M14 11v6" />
               <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
             </svg>
-            Eliminar fotos
-          </button>
-        </div>
-      </div>
-
-      <!-- Figuritas generadas -->
-      <div class="reset-item" id="itemFiguritas">
-        <p class="reset-item__title">🎴 Figuritas generadas</p>
-        <p class="reset-item__desc">
-          Elimina todos los PNGs de la carpeta <strong>03_Figuritas_Generadas</strong>.
-          El Sheet conserva los registros pero las URLs quedan rotas.
-        </p>
-        <div class="reset-item__footer">
-          <span class="reset-item__status" id="statusFiguritas"></span>
-          <button class="btn-reset" id="btnFiguritas" onclick="confirmarReset('figuritas')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
-              stroke-linejoin="round">
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-              <path d="M10 11v6M14 11v6" />
-              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-            </svg>
-            Eliminar figuritas
+            Resetear fotos y figuritas
           </button>
         </div>
       </div>
@@ -271,8 +250,7 @@
       const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwb_blECxEBUJMKPtg1Oh82Zq3f-W1RBzpWKhOZaPq53uibZO55l4_CMMJMqu6irgvu/exec';
 
       const labels = {
-        fotos: { btn: 'btnFotos', status: 'statusFotos', nombre: 'fotos originales' },
-        figuritas: { btn: 'btnFiguritas', status: 'statusFiguritas', nombre: 'figuritas generadas' },
+        todo: { btn: 'btnTodo', status: 'statusTodo', nombre: 'fotos, figuritas y registros' },
         murales: { btn: 'btnMurales', status: 'statusMurales', nombre: 'murales exportados' },
       };
 
