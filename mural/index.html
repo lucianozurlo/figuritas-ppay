@@ -789,7 +789,9 @@
             el PPTX, PDF y los PNGs de cada slide.
           `;
                         muralEnProceso = true;
+                        estadoMural = 'running';
                         actualizarUI();
+                        iniciarPolling(); // empieza a verificar cada 20s
                     } else {
                         throw new Error(data.message || 'Error desconocido');
                     }
@@ -814,8 +816,30 @@
                 }
             });
 
+            // ── POLLING ───────────────────────────────────────────────
+            // Verifica el estado cada 20s mientras el mural se genera.
+            // Cuando pasa a 'done', actualiza los datos del último mural y para.
+            let pollingTimer = null;
+
+            function iniciarPolling() {
+                if (pollingTimer) return;
+                pollingTimer = setInterval(async () => {
+                    const estadoAnterior = estadoMural;
+                    await checkEstado();
+                    if (estadoAnterior === 'running' && estadoMural !== 'running') {
+                        detenerPolling();
+                    }
+                }, 20000);
+            }
+
+            function detenerPolling() {
+                if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
+            }
+
             // Inicializar
-            checkEstado();
+            checkEstado().then(() => {
+                if (estadoMural === 'running') iniciarPolling();
+            });
         </script>
 
     </body>
