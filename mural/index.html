@@ -466,7 +466,7 @@
                 El sistema toma todas las figuritas con consentimiento de mural,
                 las ordena aleatoriamente y las distribuye en slides de 84 figuritas cada una.<br><br>
                 <strong>¿Cuánto tarda?</strong><br>
-                Depende de la cantidad de figuritas. Con 300 figuritas, aproximadamente 10-30 minutos.
+                Depende de la cantidad de figuritas. Con 300 figuritas, aproximadamente 10–15 minutos.
                 Te llega un mail cuando termine con los links de descarga.<br><br>
                 <strong>¿Qué recibís por mail?</strong><br>
                 Link a la carpeta con el mural en PPTX, PDF y un PNG por cada slide.
@@ -491,6 +491,7 @@
             let estadoMural = 'unknown';
             let muralEnProceso = false;
             let figuritasNuevas = 0;
+            let totalElegibles = 0;
 
             const newFigsBanner = document.getElementById('newFigsBanner');
             const newFigsText = document.getElementById('newFigsText');
@@ -502,6 +503,7 @@
                     const data = await r.json();
                     muralEnProceso = data.enProceso === true;
                     figuritasNuevas = data.figuritasNuevas || 0;
+                    totalElegibles = data.totalElegibles || 0;
                     if (data.enProceso) {
                         estadoMural = 'running';
                     } else if (data.tieneMural) {
@@ -522,7 +524,22 @@
             }
 
             function actualizarUI() {
-                // Banner de figuritas nuevas (solo cuando hay mural y hay nuevas)
+                // Sin figuritas elegibles: deshabilitar botón y mostrar aviso
+                if (totalElegibles === 0 && estadoMural !== 'running') {
+                    statusBadge.className = 'status-badge unknown';
+                    statusText.textContent = '⚠️ No hay figuritas para el mural';
+                    btnGenerar.disabled = true;
+                    setBtnLabel('Sin figuritas disponibles');
+                    newFigsBanner.classList.remove('visible');
+                    warnBanner.classList.remove('visible');
+                    confirmOverwrite.classList.remove('visible');
+                    return;
+                }
+
+                // Habilitar botón (puede estar deshabilitado de una verificación anterior)
+                if (!muralEnProceso) btnGenerar.disabled = false;
+
+                // Banner de figuritas nuevas fuera del mural
                 if (estadoMural === 'done' && figuritasNuevas > 0) {
                     newFigsText.textContent = `Hay ${figuritasNuevas} figurita${figuritasNuevas > 1 ? 's' : ''} nueva${figuritasNuevas > 1 ? 's' : ''} que no están en el mural actual. Generá un nuevo mural para incluirlas.`;
                     newFigsBanner.classList.add('visible');
@@ -538,14 +555,14 @@
                     setBtnLabel('Generar nuevo mural');
                 } else if (estadoMural === 'done') {
                     statusBadge.className = 'status-badge done';
-                    statusText.textContent = '✅ Hay un mural generado';
+                    statusText.textContent = `✅ Mural generado (${totalElegibles} figuritas)`;
                     warnBanner.classList.remove('visible');
                     confirmOverwrite.classList.remove('visible');
                     checkOverwrite.checked = false;
                     setBtnLabel('Generar nuevo mural');
                 } else {
                     statusBadge.className = 'status-badge idle';
-                    statusText.textContent = '🟢 Listo para generar';
+                    statusText.textContent = `🟢 Listo — ${totalElegibles} figurita${totalElegibles !== 1 ? 's' : ''} para el mural`;
                     warnBanner.classList.remove('visible');
                     confirmOverwrite.classList.remove('visible');
                     checkOverwrite.checked = false;
