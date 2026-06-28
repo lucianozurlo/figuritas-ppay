@@ -3,34 +3,32 @@
 // Procesa UNA SLIDE por ejecución, encadena via triggers.
 // ============================================================
 
-const CM_TO_PT_ = 28.3465;
-const MURAL_IMG_ALT_ = "MURAL_FIGURITA";
-const MURAL_BG_ALT_ = "MURAL_FONDO";
-const PROP_KEY_ = "MURAL_ESTADO";
-const TRIGGER_FN_ = "continuarMuralAuto_";
-const COLS_FIJO_ = 14;
-const ROWS_FIJO_ = 6;
+const CM_TO_PT_      = 28.3465;
+const MURAL_IMG_ALT_ = 'MURAL_FIGURITA';
+const MURAL_BG_ALT_  = 'MURAL_FONDO';
+const PROP_KEY_      = 'MURAL_ESTADO';
+const TRIGGER_FN_    = 'continuarMuralAuto_';
+const COLS_FIJO_     = 14;
+const ROWS_FIJO_     = 6;
 const MAX_POR_SLIDE_ = 30; // máx figuritas por ejecución para evitar timeout
 
 // Fondos rotativos (se repiten en ciclo)
 const FONDOS_IDS_ = [
-  "1qNYSUV3JrfhIAy3kbAHFhj9Uep25NcBt",
-  "15U6zRJZ1TK8PtHULLMDscpeNnDGIOd6B",
-  "1FLCtmxt9kUu9rtc88SHWvWm5uJOhvdAv",
+  '1qNYSUV3JrfhIAy3kbAHFhj9Uep25NcBt',
+  '15U6zRJZ1TK8PtHULLMDscpeNnDGIOd6B',
+  '1FLCtmxt9kUu9rtc88SHWvWm5uJOhvdAv',
 ];
+
 
 // ── ENTRADA PRINCIPAL ────────────────────────────────────────
 
 function generarMural() {
-  const ui = SpreadsheetApp.getUi();
+  const ui    = SpreadsheetApp.getUi();
   const props = PropertiesService.getScriptProperties();
 
   if (props.getProperty(PROP_KEY_)) {
-    const resp = ui.alert(
-      "⚠️ Mural en progreso",
-      "¿Descartarlo y empezar de cero?",
-      ui.ButtonSet.YES_NO,
-    );
+    const resp = ui.alert('⚠️ Mural en progreso',
+      '¿Descartarlo y empezar de cero?', ui.ButtonSet.YES_NO);
     if (resp !== ui.Button.YES) return;
     cancelarTriggersMural_();
     props.deleteProperty(PROP_KEY_);
@@ -39,26 +37,22 @@ function generarMural() {
   try {
     const figuritas = obtenerFiguritasParaMural_();
     if (figuritas.length === 0) {
-      ui.alert(
-        "Sin figuritas",
-        "No hay figuritas con consentimiento de mural listas todavía.",
-        ui.ButtonSet.OK,
-      );
+      ui.alert('Sin figuritas',
+        'No hay figuritas con consentimiento de mural listas todavía.',
+        ui.ButtonSet.OK);
       return;
     }
 
-    const barajadas = barajar_(figuritas);
-    const n = barajadas.length;
-    const porSlide = COLS_FIJO_ * ROWS_FIJO_; // 84 figuritas por slide
-    const totalSlides = Math.ceil(n / porSlide);
+    const barajadas    = barajar_(figuritas);
+    const n            = barajadas.length;
+    const porSlide     = COLS_FIJO_ * ROWS_FIJO_; // 84 figuritas por slide
+    const totalSlides  = Math.ceil(n / porSlide);
 
     // Calcular cellSize con las dimensiones reales
     const { areaW, areaH } = calcularArea_();
     const cellSize = Math.min(areaW / COLS_FIJO_, areaH / ROWS_FIJO_ / 1.25);
 
-    Logger.log(
-      `[generarMural] ${n} figuritas → ${porSlide}/slide → ${totalSlides} slide(s)`,
-    );
+    Logger.log(`[generarMural] ${n} figuritas → ${porSlide}/slide → ${totalSlides} slide(s)`);
 
     // Preparar presentación: solo dejar la slide 1
     const pres = SlidesApp.openById(CONFIG.MURAL_PRESENTATION_ID);
@@ -74,7 +68,7 @@ function generarMural() {
     // para que la API registre cada slide correctamente
     for (let s = 1; s < totalSlides; s++) {
       const presLoop = SlidesApp.openById(CONFIG.MURAL_PRESENTATION_ID);
-      const slides = presLoop.getSlides();
+      const slides   = presLoop.getSlides();
       // Duplicar la slide 0 (el diseño original)
       slides[0].duplicate();
       // La copia queda en posición 1 — moverla al final
@@ -88,14 +82,14 @@ function generarMural() {
 
     // Guardar estado
     const estado = {
-      figuritas: barajadas,
-      porSlide: porSlide,
+      figuritas:   barajadas,
+      porSlide:    porSlide,
       totalSlides: totalSlides,
       slideActual: 0,
-      imgActual: 0, // índice dentro de la slide actual (para lotes parciales)
-      cols: COLS_FIJO_,
-      cellSize: cellSize,
-      n: n,
+      imgActual:   0,  // índice dentro de la slide actual (para lotes parciales)
+      cols:        COLS_FIJO_,
+      cellSize:    cellSize,
+      n:           n,
     };
     props.setProperty(PROP_KEY_, JSON.stringify(estado));
 
@@ -103,38 +97,35 @@ function generarMural() {
     const res = procesarLoteActual_();
 
     if (res.completado) {
-      ui.alert(
-        "✅ Mural listo",
-        `${n} figuritas en ${totalSlides} slide(s).`,
-        ui.ButtonSet.OK,
-      );
+      ui.alert('✅ Mural listo',
+        `${n} figuritas en ${totalSlides} slide(s).`, ui.ButtonSet.OK);
       return;
     }
 
     crearTriggerContinuacion_();
 
     const est = JSON.parse(props.getProperty(PROP_KEY_));
-    ui.alert(
-      "🖼️ Mural iniciado",
+    ui.alert('🖼️ Mural iniciado',
       `Procesando slide 1/${totalSlides}...\n` +
-        `Las restantes se generan automáticamente.\n` +
-        `Recibirás un mail al terminar.`,
-      ui.ButtonSet.OK,
-    );
+      `Las restantes se generan automáticamente.\n` +
+      `Recibirás un mail al terminar.`,
+      ui.ButtonSet.OK);
+
   } catch (err) {
-    Logger.log("[generarMural] ERROR: " + err.toString());
+    Logger.log('[generarMural] ERROR: ' + err.toString());
     cancelarTriggersMural_();
     props.deleteProperty(PROP_KEY_);
-    ui.alert("❌ Error", err.message, ui.ButtonSet.OK);
+    ui.alert('❌ Error', err.message, ui.ButtonSet.OK);
   }
 }
+
 
 // ── CONTINUACIÓN AUTOMÁTICA ──────────────────────────────────
 
 function continuarMuralAuto_() {
   cancelarTriggersMural_();
   const props = PropertiesService.getScriptProperties();
-  const raw = props.getProperty(PROP_KEY_);
+  const raw   = props.getProperty(PROP_KEY_);
   if (!raw) return;
 
   try {
@@ -145,27 +136,26 @@ function continuarMuralAuto_() {
     }
 
     const res = procesarLoteActual_();
-    Logger.log(
-      `[continuarMuralAuto_] Lote: ${res.insertadas} ok, ${res.errores} err. Completado: ${res.completado}`,
-    );
+    Logger.log(`[continuarMuralAuto_] Lote: ${res.insertadas} ok, ${res.errores} err. Completado: ${res.completado}`);
 
     if (!res.completado) {
       crearTriggerContinuacion_();
     } else {
-      try {
-        MailApp.sendEmail({
-          to: Session.getActiveUser().getEmail(),
-          subject: "✅ Mural listo — Mi Figurita Personal Pay",
-          body: `El mural fue generado correctamente.\n\nFiguritas: ${estado.n}\nSlides: ${estado.totalSlides}`,
-        });
-      } catch (_) {}
+      // Guardar timestamp del mural recién generado (ISO, UTC)
+      PropertiesService.getScriptProperties()
+        .setProperty('MURAL_ULTIMO_TS', new Date().toISOString());
+      // Disparar export en trigger separado para no hacer timeout aquí
+      ScriptApp.newTrigger('triggerExportarMural_')
+        .timeBased().after(30 * 1000).create();
+      Logger.log('[continuarMuralAuto_] Mural completado. Trigger de export creado en 30s.');
     }
   } catch (err) {
-    Logger.log("[continuarMuralAuto_] ERROR: " + err.toString());
+    Logger.log('[continuarMuralAuto_] ERROR: ' + err.toString());
     cancelarTriggersMural_();
     PropertiesService.getScriptProperties().deleteProperty(PROP_KEY_);
   }
 }
+
 
 // ── PROCESAR UN LOTE (máx MAX_POR_SLIDE_ figuritas) ─────────
 
@@ -175,46 +165,34 @@ function continuarMuralAuto_() {
  * múltiples lotes encadenados por trigger.
  */
 function procesarLoteActual_() {
-  const props = PropertiesService.getScriptProperties();
+  const props  = PropertiesService.getScriptProperties();
   const estado = JSON.parse(props.getProperty(PROP_KEY_));
 
-  const {
-    figuritas,
-    porSlide,
-    totalSlides,
-    slideActual,
-    imgActual,
-    cols: c,
-    cellSize: cs,
-    n,
-  } = estado;
+  const { figuritas, porSlide, totalSlides, slideActual,
+          imgActual, cols: c, cellSize: cs, n } = estado;
 
   const slideInicio = slideActual * porSlide;
-  const slideFin = Math.min(slideInicio + porSlide, n);
+  const slideFin    = Math.min(slideInicio + porSlide, n);
 
   // Lote: desde imgActual hasta imgActual + MAX_POR_SLIDE_
   const loteInicio = slideInicio + imgActual;
-  const loteFin = Math.min(loteInicio + MAX_POR_SLIDE_, slideFin);
+  const loteFin    = Math.min(loteInicio + MAX_POR_SLIDE_, slideFin);
   const enEsteLote = figuritas.slice(loteInicio, loteFin);
 
-  Logger.log(
-    `[procesarLote] Slide ${slideActual + 1}/${totalSlides}, imgs ${imgActual}–${imgActual + enEsteLote.length - 1}`,
-  );
+  Logger.log(`[procesarLote] Slide ${slideActual + 1}/${totalSlides}, imgs ${imgActual}–${imgActual + enEsteLote.length - 1}`);
 
   const { headerPt, padTop, padLeft } = calcularArea_();
-  const dim = getDimensionesMural_();
+  const dim   = getDimensionesMural_();
   const RATIO = 1.25;
-  const gap = Math.max(0.5, cs * 0.025);
-  const imgW = cs - gap * 2;
-  const imgH = imgW * RATIO;
+  const gap   = Math.max(0.5, cs * 0.025);
+  const imgW  = cs - gap * 2;
+  const imgH  = imgW * RATIO;
 
-  const pres = SlidesApp.openById(CONFIG.MURAL_PRESENTATION_ID);
+  const pres  = SlidesApp.openById(CONFIG.MURAL_PRESENTATION_ID);
   const slides = pres.getSlides();
 
   if (slideActual >= slides.length) {
-    throw new Error(
-      `Slide ${slideActual} no existe (hay ${slides.length} slides).`,
-    );
+    throw new Error(`Slide ${slideActual} no existe (hay ${slides.length} slides).`);
   }
   const slide = slides[slideActual];
 
@@ -224,27 +202,25 @@ function procesarLoteActual_() {
   }
 
   let insertadas = 0;
-  let errores = 0;
+  let errores    = 0;
 
   for (let i = 0; i < enEsteLote.length; i++) {
     const idxEnSlide = imgActual + i;
     const col = idxEnSlide % c;
     const row = Math.floor(idxEnSlide / c);
-    const x = padLeft + col * cs + gap;
-    const y = headerPt + padTop + row * (imgH + gap * 2) + gap;
+    const x   = padLeft + col * cs + gap;
+    const y   = headerPt + padTop + row * (imgH + gap * 2) + gap;
 
     const fileId = enEsteLote[i].fileId;
     try {
       const blob = DriveApp.getFileById(fileId).getBlob();
-      const img = slide.insertImage(blob);
+      const img  = slide.insertImage(blob);
       img.setLeft(x).setTop(y).setWidth(imgW).setHeight(imgH);
       img.setTitle(MURAL_IMG_ALT_);
-      img.setDescription(enEsteLote[i].nombre || "");
+      img.setDescription(enEsteLote[i].nombre || '');
       insertadas++;
     } catch (eImg) {
-      Logger.log(
-        `[procesarLote] Error img idx ${loteInicio + i} (${fileId}): ${eImg.message}`,
-      );
+      Logger.log(`[procesarLote] Error img idx ${loteInicio + i} (${fileId}): ${eImg.message}`);
       errores++;
     }
   }
@@ -253,11 +229,11 @@ function procesarLoteActual_() {
 
   // Avanzar estado
   const nuevoImgActual = imgActual + enEsteLote.length;
-  const slideTerminada = nuevoImgActual >= slideFin - slideInicio;
+  const slideTerminada = nuevoImgActual >= (slideFin - slideInicio);
 
   if (slideTerminada) {
     estado.slideActual = slideActual + 1;
-    estado.imgActual = 0;
+    estado.imgActual   = 0;
   } else {
     estado.imgActual = nuevoImgActual;
   }
@@ -273,6 +249,7 @@ function procesarLoteActual_() {
   return { insertadas, errores, completado };
 }
 
+
 // ── APLICAR FONDO ────────────────────────────────────────────
 
 function aplicarFondo_(slide, slideIndex, slideW, slideH) {
@@ -283,7 +260,7 @@ function aplicarFondo_(slide, slideIndex, slideW, slideH) {
 
     // Insertar el fondo nuevo
     const blob = DriveApp.getFileById(fondoId).getBlob();
-    const bg = slide.insertImage(blob);
+    const bg   = slide.insertImage(blob);
     bg.setLeft(0).setTop(0).setWidth(slideW).setHeight(slideH);
     bg.setTitle(MURAL_BG_ALT_);
 
@@ -292,36 +269,35 @@ function aplicarFondo_(slide, slideIndex, slideW, slideH) {
     // (textos, logos, formas) para que queden por encima del fondo.
     // El fondo recién insertado queda al final por defecto.
     const bgId = bg.getObjectId();
-    slide.getPageElements().forEach((pe) => {
+    slide.getPageElements().forEach(pe => {
       try {
         if (pe.getObjectId() !== bgId) pe.bringToFront();
       } catch (_) {}
     });
 
-    Logger.log(
-      `[aplicarFondo_] Fondo ${(slideIndex % 3) + 1} → slide ${slideIndex + 1}`,
-    );
+    Logger.log(`[aplicarFondo_] Fondo ${slideIndex % 3 + 1} → slide ${slideIndex + 1}`);
   } catch (e) {
     Logger.log(`[aplicarFondo_] Error fondo ${fondoId}: ${e.message}`);
   }
 }
 
+
 // ── HELPERS ──────────────────────────────────────────────────
 
 function getDimensionesMural_() {
   const pres = SlidesApp.openById(CONFIG.MURAL_PRESENTATION_ID);
-  const w = pres.getPageWidth();
-  const h = pres.getPageHeight();
+  const w    = pres.getPageWidth();
+  const h    = pres.getPageHeight();
   pres.saveAndClose();
   return { w, h };
 }
 
 function calcularArea_() {
-  const dim = getDimensionesMural_();
+  const dim      = getDimensionesMural_();
   const headerPt = CONFIG.MURAL_HEADER_CM * CM_TO_PT_;
-  const padBase = dim.w * 0.015625;
-  const padTop = 1.0 * CM_TO_PT_;
-  const padLeft = padBase * 3;
+  const padBase  = dim.w * 0.015625;
+  const padTop   = 1.0 * CM_TO_PT_;
+  const padLeft  = padBase * 3;
   return {
     headerPt,
     padTop,
@@ -329,18 +305,16 @@ function calcularArea_() {
     padBase,
     slideW: dim.w,
     slideH: dim.h,
-    areaW: dim.w - padLeft * 2,
-    areaH: dim.h - headerPt - padTop - padBase,
+    areaW:  dim.w - padLeft * 2,
+    areaH:  dim.h - headerPt - padTop - padBase,
   };
 }
 
 function eliminarTodasLasImagenes_(slide) {
   if (!slide) return;
   try {
-    slide.getImages().forEach((img) => {
-      try {
-        img.remove();
-      } catch (_) {}
+    slide.getImages().forEach(img => {
+      try { img.remove(); } catch (_) {}
     });
   } catch (_) {}
 }
@@ -348,55 +322,47 @@ function eliminarTodasLasImagenes_(slide) {
 function limpiarFiguritasAnteriores_(slide) {
   if (!slide) return;
   try {
-    slide.getImages().forEach((img) => {
-      try {
-        if (img.getTitle() === MURAL_IMG_ALT_) img.remove();
-      } catch (_) {}
+    slide.getImages().forEach(img => {
+      try { if (img.getTitle() === MURAL_IMG_ALT_) img.remove(); }
+      catch (_) {}
     });
   } catch (_) {}
 }
 
 function obtenerFiguritasParaMural_() {
-  const sheet = getSheet_();
+  const sheet  = getSheet_();
   const colMap = getColumnMap_(sheet);
-  const data = sheet.getDataRange().getValues();
+  const data   = sheet.getDataRange().getValues();
 
   const colEstado = colMap[CONFIG.COLUMNS.estado];
-  const colMural = colMap[CONFIG.COLUMNS.consentimientoMural];
-  const colFigId = colMap[CONFIG.COLUMNS.idFiguraGenerada];
+  const colMural  = colMap[CONFIG.COLUMNS.consentimientoMural];
+  const colFigId  = colMap[CONFIG.COLUMNS.idFiguraGenerada];
   const colNombre = colMap[CONFIG.COLUMNS.nombre];
 
   if (!colEstado || !colMural || !colFigId) {
-    throw new Error("Columnas faltantes en el Sheet.");
+    throw new Error('Columnas faltantes en el Sheet.');
   }
 
   return data.slice(1).reduce((acc, row) => {
-    const estado = String(row[colEstado - 1] || "").trim();
-    const mural = String(row[colMural - 1] || "").trim();
-    const fileId = String(row[colFigId - 1] || "").trim();
-    const nombre = String(row[colNombre - 1] || "").trim();
-    const estadoOK = estado === "EMAIL_ENVIADO" || estado === "FIGURITA_CREADA";
-    const muralOK = mural === "Sí" || mural === "Si" || mural === "TRUE";
+    const estado = String(row[colEstado - 1] || '').trim();
+    const mural  = String(row[colMural  - 1] || '').trim();
+    const fileId = String(row[colFigId  - 1] || '').trim();
+    const nombre = String(row[colNombre - 1] || '').trim();
+    const estadoOK = estado === 'EMAIL_ENVIADO' || estado === 'FIGURITA_CREADA';
+    const muralOK  = mural === 'Sí' || mural === 'Si' || mural === 'TRUE';
     if (estadoOK && muralOK && fileId) acc.push({ nombre, fileId });
     return acc;
   }, []);
 }
 
 function crearTriggerContinuacion_() {
-  ScriptApp.newTrigger(TRIGGER_FN_)
-    .timeBased()
-    .after(90 * 1000)
-    .create();
+  ScriptApp.newTrigger(TRIGGER_FN_).timeBased().after(90 * 1000).create();
 }
 
 function cancelarTriggersMural_() {
   ScriptApp.getProjectTriggers()
-    .filter((t) => t.getHandlerFunction() === TRIGGER_FN_)
-    .forEach((t) => {
-      try {
-        ScriptApp.deleteTrigger(t);
-      } catch (_) {}
-    });
+    .filter(t => t.getHandlerFunction() === TRIGGER_FN_)
+    .forEach(t => { try { ScriptApp.deleteTrigger(t); } catch (_) {} });
 }
 
 function barajar_(arr) {
@@ -406,4 +372,266 @@ function barajar_(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+
+// ============================================================
+// VERSIÓN SILENCIOSA (sin UI) — para endpoint y triggers
+// ============================================================
+
+/**
+ * Igual que generarMural() pero sin alerts de UI.
+ * Usada cuando se llama desde el endpoint HTTP.
+ */
+function generarMuralSilencioso_() {
+  const props = PropertiesService.getScriptProperties();
+  if (props.getProperty(PROP_KEY_)) {
+    Logger.log('[generarMuralSilencioso_] Ya hay un mural en progreso.');
+    return;
+  }
+
+  Logger.log('[generarMuralSilencioso_] Obteniendo figuritas...');
+  const figuritas = obtenerFiguritasParaMural_();
+  if (figuritas.length === 0) {
+    Logger.log('[generarMuralSilencioso_] Sin figuritas elegibles.');
+    return;
+  }
+  Logger.log('[generarMuralSilencioso_] Figuritas: ' + figuritas.length);
+
+  const barajadas   = barajar_(figuritas);
+  const n           = barajadas.length;
+  const porSlide    = COLS_FIJO_ * ROWS_FIJO_;
+  const totalSlides = Math.ceil(n / porSlide);
+
+  Logger.log('[generarMuralSilencioso_] Calculando área...');
+  const { areaW, areaH } = calcularArea_();
+  const cellSize    = Math.min(areaW / COLS_FIJO_, areaH / ROWS_FIJO_ / 1.25);
+
+  Logger.log(`[generarMuralSilencioso_] ${n} figuritas → ${totalSlides} slide(s), cellSize=${cellSize.toFixed(1)}`);
+
+  Logger.log('[generarMuralSilencioso_] Preparando presentación...');
+  const pres = SlidesApp.openById(CONFIG.MURAL_PRESENTATION_ID);
+  const existentes = pres.getSlides();
+  for (let i = existentes.length - 1; i >= 1; i--) existentes[i].remove();
+  eliminarTodasLasImagenes_(pres.getSlides()[0]);
+  pres.saveAndClose();
+  Logger.log('[generarMuralSilencioso_] Slide 1 limpia.');
+
+  for (let s = 1; s < totalSlides; s++) {
+    const p  = SlidesApp.openById(CONFIG.MURAL_PRESENTATION_ID);
+    const sl = p.getSlides();
+    sl[0].duplicate();
+    const slNow = p.getSlides();
+    if (slNow.length > 2) slNow[1].move(slNow.length - 1);
+    p.saveAndClose();
+    Logger.log(`[generarMuralSilencioso_] Slide ${s + 1} creada.`);
+  }
+
+  const estado = {
+    figuritas: barajadas, porSlide, totalSlides,
+    slideActual: 0, imgActual: 0,
+    cols: COLS_FIJO_, cellSize, n,
+  };
+  props.setProperty(PROP_KEY_, JSON.stringify(estado));
+  Logger.log('[generarMuralSilencioso_] Estado guardado. Procesando primer lote...');
+
+  const res = procesarLoteActual_();
+  Logger.log('[generarMuralSilencioso_] Primer lote: ' + JSON.stringify(res));
+  if (!res.completado) {
+    crearTriggerContinuacion_();
+  } else {
+    // Completado en un solo lote — guardar timestamp y exportar
+    Logger.log('[generarMuralSilencioso_] Completado en un solo lote. Creando trigger de export...');
+    PropertiesService.getScriptProperties()
+      .setProperty('MURAL_ULTIMO_TS', new Date().toISOString());
+    ScriptApp.newTrigger('triggerExportarMural_')
+      .timeBased().after(30 * 1000).create();
+  }
+}
+
+
+/**
+ * Wrapper para llamar exportarMuralSilencioso_ desde un trigger de tiempo.
+ */
+function triggerExportarMural_() {
+  // Eliminar el trigger que disparó esta función
+  ScriptApp.getProjectTriggers()
+    .filter(t => t.getHandlerFunction() === 'triggerExportarMural_')
+    .forEach(t => { try { ScriptApp.deleteTrigger(t); } catch (_) {} });
+
+  Logger.log('[triggerExportarMural_] Iniciando export...');
+  try {
+    exportarMuralSilencioso_();
+    Logger.log('[triggerExportarMural_] Export completado OK.');
+  } catch (err) {
+    Logger.log('[triggerExportarMural_] ERROR: ' + err.toString());
+    Logger.log('[triggerExportarMural_] STACK: ' + (err.stack || 'sin stack'));
+  }
+}
+
+// ============================================================
+// EXPORT: PNG + PPTX en carpeta versionada de Drive
+// ============================================================
+
+/**
+ * Exporta la presentación del mural a:
+ *   - Un archivo PPTX
+ *   - Un PNG por cada slide (1920×1080)
+ * Todo en una subcarpeta versionada dentro de mural-final/.
+ *
+ * Llamada automáticamente al completar el mural, o manualmente
+ * desde el menú Sheet → 🎴 Figuritas Admin → 📦 Exportar mural.
+ */
+function exportarMural() {
+  const ui = SpreadsheetApp.getUi();
+  try {
+    const carpetaVersion = crearCarpetaVersion_();
+    const { pptxFile, pdfFile, pngFiles } = ejecutarExport_(carpetaVersion);
+
+    ui.alert('✅ Mural exportado',
+      `Carpeta: ${carpetaVersion.getName()}\n` +
+      `PPTX: ${pptxFile.getName()}\n` +
+      `PDF: ${pdfFile.getName()}\n` +
+      `PNGs: ${pngFiles.length} slides\n\n` +
+      `Link: ${carpetaVersion.getUrl()}`,
+      ui.ButtonSet.OK);
+  } catch (err) {
+    Logger.log('[exportarMural] ERROR: ' + err.toString());
+    ui.alert('❌ Error exportando', err.message, ui.ButtonSet.OK);
+  }
+}
+
+/**
+ * Versión silenciosa del export — para llamar al terminar el mural.
+ */
+function exportarMuralSilencioso_() {
+  // Eliminar el trigger que disparó esta función
+  ScriptApp.getProjectTriggers()
+    .filter(t => t.getHandlerFunction() === 'exportarMuralSilencioso_')
+    .forEach(t => { try { ScriptApp.deleteTrigger(t); } catch (_) {} });
+
+  Logger.log('[exportarMuralSilencioso_] Iniciando export...');
+  try {
+    const carpetaVersion = crearCarpetaVersion_();
+    Logger.log('[exportarMuralSilencioso_] Carpeta creada: ' + carpetaVersion.getName());
+
+    const { pptxFile, pdfFile, pngFiles } = ejecutarExport_(carpetaVersion);
+    Logger.log(`[exportarMuralSilencioso_] Export OK: PPTX, PDF, ${pngFiles.length} PNGs`);
+
+    const props    = PropertiesService.getScriptProperties();
+    const mailDest = props.getProperty('MURAL_NOTIF_MAIL') || Session.getActiveUser().getEmail();
+    props.deleteProperty('MURAL_NOTIF_MAIL');
+
+    try {
+      const pngLinks = pngFiles.map((f, i) =>
+        `  Slide ${String(i+1).padStart(2,'0')}: ${f.getUrl()}`
+      ).join('\n');
+
+      MailApp.sendEmail({
+        to:      mailDest,
+        subject: '✅ Mural listo — Mi Figurita Personal Pay',
+        body:    `¡El mural fue generado y exportado correctamente!\n\n` +
+                 `Carpeta: ${carpetaVersion.getName()}\n` +
+                 `Link: ${carpetaVersion.getUrl()}\n\n` +
+                 `— PPTX —\n  ${pptxFile.getUrl()}\n\n` +
+                 `— PDF —\n  ${pdfFile.getUrl()}\n\n` +
+                 `— PNGs por slide —\n${pngLinks}`
+      });
+      Logger.log('[exportarMuralSilencioso_] Mail enviado a: ' + mailDest);
+    } catch (eMail) {
+      Logger.log('[exportarMuralSilencioso_] Error enviando mail: ' + eMail.toString());
+    }
+  } catch (err) {
+    Logger.log('[exportarMuralSilencioso_] ERROR: ' + err.toString());
+    Logger.log('[exportarMuralSilencioso_] STACK: ' + (err.stack || 'sin stack'));
+  }
+}
+
+/**
+ * Crea la carpeta versionada: mural-final/vN_YYYY-MM-DD_HH-mm/
+ */
+function crearCarpetaVersion_() {
+  const raiz = DriveApp.getFolderById(CONFIG.FOLDER_RAIZ_ID);
+
+  // Obtener o crear carpeta mural-final/
+  let carpetaMural;
+  const it = raiz.getFoldersByName(CONFIG.MURAL_EXPORT_FOLDER_NAME);
+  carpetaMural = it.hasNext() ? it.next() : raiz.createFolder(CONFIG.MURAL_EXPORT_FOLDER_NAME);
+
+  // Calcular número de versión
+  const versiones = [];
+  const itV = carpetaMural.getFolders();
+  while (itV.hasNext()) {
+    const nombre = itV.next().getName();
+    const match  = nombre.match(/^v(\d+)_/);
+    if (match) versiones.push(parseInt(match[1]));
+  }
+  const numVersion = versiones.length > 0 ? Math.max(...versiones) + 1 : 1;
+
+  // Nombre de la carpeta: vN_YYYY-MM-DD_HH-mm
+  const ahora     = new Date();
+  const fechaStr  = Utilities.formatDate(ahora, 'America/Argentina/Buenos_Aires', 'yyyy-MM-dd_HH-mm');
+  const nombreCarpeta = `v${numVersion}_${fechaStr}`;
+
+  return carpetaMural.createFolder(nombreCarpeta);
+}
+
+/**
+ * Hace el export real: PPTX + PNGs por slide.
+ */
+function ejecutarExport_(carpeta) {
+  const presentationId = CONFIG.MURAL_PRESENTATION_ID;
+  const token          = ScriptApp.getOAuthToken();
+  const pres           = SlidesApp.openById(presentationId);
+  const slides         = pres.getSlides();
+  const nombreBase     = carpeta.getName();
+
+  // ── EXPORT PPTX ───────────────────────────────────────────
+  const pptxUrl  = `https://docs.google.com/presentation/d/${presentationId}/export/pptx`;
+  const pptxResp = UrlFetchApp.fetch(pptxUrl, {
+    headers: { Authorization: `Bearer ${token}` },
+    muteHttpExceptions: true,
+  });
+  if (pptxResp.getResponseCode() !== 200) {
+    throw new Error(`Error exportando PPTX: HTTP ${pptxResp.getResponseCode()}`);
+  }
+  const pptxBlob = pptxResp.getBlob().setName(`${nombreBase}.pptx`);
+  const pptxFile = carpeta.createFile(pptxBlob);
+  Logger.log(`[ejecutarExport_] PPTX: ${pptxFile.getName()}`);
+
+  // ── EXPORT PDF ────────────────────────────────────────────
+  const pdfUrl  = `https://docs.google.com/presentation/d/${presentationId}/export/pdf`;
+  const pdfResp = UrlFetchApp.fetch(pdfUrl, {
+    headers: { Authorization: `Bearer ${token}` },
+    muteHttpExceptions: true,
+  });
+  if (pdfResp.getResponseCode() !== 200) {
+    throw new Error(`Error exportando PDF: HTTP ${pdfResp.getResponseCode()}`);
+  }
+  const pdfBlob = pdfResp.getBlob().setName(`${nombreBase}.pdf`);
+  const pdfFile = carpeta.createFile(pdfBlob);
+  Logger.log(`[ejecutarExport_] PDF: ${pdfFile.getName()}`);
+
+  // ── EXPORT PNG POR SLIDE ───────────────────────────────────
+  const pngFiles = [];
+  slides.forEach((slide, idx) => {
+    const slideId  = slide.getObjectId();
+    // scale=2 sobre 960×540pt base = 1920×1080px
+    const pngUrl   = `https://docs.google.com/presentation/d/${presentationId}/export/png?pageid=${slideId}&scale=2`;
+    const pngResp  = UrlFetchApp.fetch(pngUrl, {
+      headers: { Authorization: `Bearer ${token}` },
+      muteHttpExceptions: true,
+    });
+    if (pngResp.getResponseCode() !== 200) {
+      Logger.log(`[ejecutarExport_] Error PNG slide ${idx + 1}: HTTP ${pngResp.getResponseCode()}`);
+      return;
+    }
+    const pngBlob = pngResp.getBlob().setName(`${nombreBase}_slide${String(idx + 1).padStart(2, '0')}.png`);
+    const pngFile = carpeta.createFile(pngBlob);
+    pngFiles.push(pngFile);
+    Logger.log(`[ejecutarExport_] PNG slide ${idx + 1}: ${pngFile.getName()}`);
+  });
+
+  pres.saveAndClose();
+  return { pptxFile, pdfFile, pngFiles };
 }
