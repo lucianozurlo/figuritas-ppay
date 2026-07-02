@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="es">
+
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Envío de Mails — Personal Pay</title>
+        <style>
+            :root {
+                --c-bg: #F2F4F8;
+                --c-surface: #FFFFFF;
+                --c-brand: #0062FF;
+                --c-brand-dk: #0047CC;
+                --c-accent: #00C6A2;
+                --c-text: #111827;
+                --c-muted: #6B7280;
+                --c-border: #D1D5DB;
+                --c-error: #DC2626;
+                --c-error-bg: #FEF2F2;
+                --c-warn: #D97706;
+                --c-warn-bg: #FFFBEB;
+                --c-warn-br: #F59E0B;
+                --radius: 18px;
+                --radius-sm: 12px;
+                --shadow: 0 2px 20px rgba(0, 0, 0, .07);
+            }
+
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: var(--c-bg);
+                color: var(--c-text);
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 40px 16px 60px;
+                -webkit-font-smoothing: antialiased;
+            }
+
+            .header {
+                text-align: center;
+                margin-bottom: 28px;
+            }
+
+            .header__eyebrow {
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: .14em;
+                text-transform: uppercase;
+                color: var(--c-brand);
+                margin-bottom: 8px;
+            }
+
+            .header__title {
+                font-size: 26px;
+                font-weight: 800;
+                line-height: 1.2;
+            }
+
+            .header__title mark {
+                background: none;
+                color: var(--c-brand);
+            }
+
+            .header__sub {
+                margin-top: 8px;
+                font-size: 14px;
+                color: var(--c-muted);
+            }
+
+            .card {
+                background: var(--c-surface);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow);
+                padding: 28px 24px 32px;
+                width: 100%;
+                max-width: 520px;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            /* ── BADGE DE ESTADO ─────────────────────────── */
+            .status-badge {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 8px 14px;
+                border-radius: 100px;
+                font-size: 13px;
+                font-weight: 700;
+            }
+
+            .status-badge.idle {
+                background: #F0FDF4;
+                color: #065F46;
+                border: 1.5px solid #86EFAC;
+            }
+
+            .status-badge.running {
+                background: #EFF6FF;
+                color: #1D4ED8;
+                border: 1.5px solid #93C5FD;
+            }
+
+            .status-badge.done {
+                background: #F0FDF4;
+                color: #065F46;
+                border: 1.5px solid #86EFAC;
+            }
+
+            .status-badge.unknown {
+                background: var(--c-bg);
+                color: var(--c-muted);
+                border: 1.5px solid var(--c-border);
+            }
+
+            .status-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+
+            .idle .status-dot {
+                background: #22C55E;
+            }
+
+            .running .status-dot {
+                background: #3B82F6;
+                animation: pulse-dot 1.2s ease-in-out infinite;
+            }
+
+            .done .status-dot {
+                background: #22C55E;
+            }
+
+            .unknown .status-dot {
+                background: var(--c-border);
+            }
+
+            @keyframes pulse-dot {
+
+                0%,
+                100% {
+                    opacity: 1;
+                    transform: scale(1);
+                }
+
+                50% {
+                    opacity: .5;
+                    transform: scale(1.4);
+                }
+            }
+
+            /* ── STATS ───────────────────────────────────── */
+            .stats {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .stat {
+                padding: 14px 16px;
+                border-radius: var(--radius-sm);
+                border: 1.5px solid var(--c-border);
+                background: var(--c-bg);
+            }
+
+            .stat__value {
+                font-size: 28px;
+                font-weight: 800;
+                line-height: 1;
+                margin-bottom: 4px;
+                font-variant-numeric: tabular-nums;
+            }
+
+            .stat__label {
+                font-size: 12px;
+                color: var(--c-muted);
+            }
+
+            .stat.highlight {
+                background: #EFF6FF;
+                border-color: #93C5FD;
+            }
+
+            .stat.highlight .stat__value {
+                color: var(--c-brand);
+            }
+
+            .stat.sent {
+                background: #F0FDF4;
+                border-color: #86EFAC;
+            }
+
+            .stat.sent .stat__value {
+                color: #059669;
+            }
+
+            .stat.error {
+                background: var(--c-error-bg);
+                border-color: #FCA5A5;
+            }
+
+            .stat.error .stat__value {
+                color: var(--c-error);
+            }
+
+            .stat.quota {
+                background: #FFFBEB;
+                border-color: var(--c-warn-br);
+            }
+
+            .stat.quota .stat__value {
+                color: var(--c-warn);
+            }
+
+            /* ── BARRA DE PROGRESO ───────────────────────── */
+            .progress-section {
+                display: none;
+            }
+
+            .progress-section.visible {
+                display: block;
+            }
+
+            .progress-label {
+                display: flex;
+                justify-content: space-between;
+                font-size: 13px;
+                color: var(--c-muted);
+                margin-bottom: 8px;
+            }
+
+            .progress-label strong {
+                color: var(--c-text);
+            }
+
+            .progress-bar {
+                width: 100%;
+                height: 8px;
+                border-radius: 4px;
+                background: var(--c-bg);
+                overflow: hidden;
+            }
+
+            .progress-fill {
+                height: 100%;
+                border-radius: 4px;
+                width: 0%;
+                background: linear-gradient(90deg, var(--c-brand), var(--c-accent));
+                transition: width .5s ease;
+            }
+
+            /* ── CHECKBOX ────────────────────────────────── */
+            .check-block {
+                display: flex;
+                gap: 10px;
+                align-items: flex-start;
+                padding: 12px 14px;
+                border-radius: var(--radius-sm);
+                border: 1.5px solid var(--c-warn-br);
+                background: var(--c-warn-bg);
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+                user-select: none;
+            }
+
+            .check-block input[type="checkbox"] {
+                width: 20px;
+                height: 20px;
+                min-width: 20px;
+                accent-color: var(--c-warn);
+                margin-top: 1px;
+            }
+
+            .check-block__text {
+                font-size: 13px;
+                color: #92400E;
+                line-height: 1.5;
+            }
+
+            /* ── BOTONES ─────────────────────────────────── */
+            .btns {
+                display: flex;
+                gap: 10px;
+            }
+
+            .btn {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                min-height: 50px;
+                padding: 13px 16px;
+                border-radius: var(--radius-sm);
+                border: none;
+                font-size: 15px;
+                font-weight: 700;
+                font-family: inherit;
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent;
+                transition: background .12s, opacity .12s;
+            }
+
+            .btn:disabled {
+                opacity: .5;
+                cursor: not-allowed;
+            }
+
+            .btn svg {
+                width: 18px;
+                height: 18px;
+                flex-shrink: 0;
+            }
+
+            .btn--primary {
+                background: var(--c-brand);
+                color: #fff;
+            }
+
+            .btn--primary:active:not(:disabled) {
+                background: var(--c-brand-dk);
+            }
+
+            .btn--danger {
+                background: var(--c-error-bg);
+                color: var(--c-error);
+                border: 1.5px solid #FCA5A5;
+            }
+
+            .btn--spinner {
+                display: none;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                border: 2.5px solid rgba(255, 255, 255, .4);
+                border-top-color: #fff;
+                animation: spin .7s linear infinite;
+            }
+
+            .btn.loading .btn--spinner {
+                display: block;
+            }
+
+            .btn.loading .btn--icon {
+                display: none;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            /* ── RESULTADO ───────────────────────────────── */
+            .result {
+                display: none;
+                padding: 14px 16px;
+                border-radius: var(--radius-sm);
+                font-size: 14px;
+                line-height: 1.6;
+            }
+
+            .result.visible {
+                display: block;
+            }
+
+            .result.ok {
+                background: #F0FDF4;
+                border: 1.5px solid #86EFAC;
+                color: #065F46;
+            }
+
+            .result.error {
+                background: var(--c-error-bg);
+                border: 1.5px solid #FCA5A5;
+                color: var(--c-error);
+            }
+
+            .result strong {
+                display: block;
+                font-size: 15px;
+                margin-bottom: 4px;
+            }
+
+            .divider {
+                border: none;
+                border-top: 1px solid var(--c-border);
+            }
+
+            .info {
+                font-size: 13px;
+                color: var(--c-muted);
+                line-height: 1.7;
+            }
+
+            .info strong {
+                color: var(--c-text);
+            }
+
+        </style>
+    </head>
+
+    <body>
+
+        <div class="header">
+            <p class="header__eyebrow">Personal Pay · All Hands 2025</p>
+            <h1 class="header__title">Envío de <mark>Figuritas</mark></h1>
+            <p class="header__sub">Enviá las figuritas por mail a todos los participantes</p>
+        </div>
+
+        <div class="card">
+
+            <!-- Estado -->
+            <div class="status-badge unknown" id="statusBadge">
+                <span class="status-dot"></span>
+                <span id="statusText">Verificando…</span>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat highlight">
+                    <div class="stat__value" id="statPendientes">—</div>
+                    <div class="stat__label">📨 Para enviar</div>
+                </div>
+                <div class="stat sent">
+                    <div class="stat__value" id="statEnviados">—</div>
+                    <div class="stat__label">✅ Enviados</div>
+                </div>
+                <div class="stat error">
+                    <div class="stat__value" id="statErrores">—</div>
+                    <div class="stat__label">❌ Con error</div>
+                </div>
+                <div class="stat quota">
+                    <div class="stat__value" id="statCuota">—</div>
+                    <div class="stat__label">📮 Cuota restante</div>
+                </div>
+            </div>
+
+            <!-- Barra de progreso (solo mientras envía) -->
+            <div class="progress-section" id="progressSection">
+                <div class="progress-label">
+                    <span>Enviando…</span>
+                    <strong id="progressText">0 / 0</strong>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- Reintentar errores -->
+            <label class="check-block" id="checkErrorBlock" style="display:none">
+                <input type="checkbox" id="checkErrores" />
+                <span class="check-block__text">
+                    Reintentar los <strong id="cantErrores">0</strong> envíos con error
+                </span>
+            </label>
+
+            <hr class="divider" />
+
+            <!-- ── PRUEBA ──────────────────────────────────────────── -->
+            <div>
+                <p
+                    style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--c-muted);margin-bottom:10px;">
+                    🧪 Envío de prueba
+                </p>
+                <p style="font-size:13px;color:var(--c-muted);margin-bottom:12px;line-height:1.5;">
+                    Tomá la primera figurita del registro y enviala a un mail de prueba.
+                    El PNG va adjunto en el mail, igual que en el envío real.
+                </p>
+                <div style="display:flex;gap:8px;align-items:flex-start;">
+                    <div style="flex:1;">
+                        <input type="email" id="mailPrueba" placeholder="correo@prueba.com" style="width:100%;font-size:15px;padding:12px 14px;border-radius:var(--radius-sm);
+                   border:1.5px solid var(--c-border);background:var(--c-surface);
+                   color:var(--c-text);outline:none;font-family:inherit;" autocomplete="off" autocorrect="off"
+                            autocapitalize="none" inputmode="email" />
+                    </div>
+                    <button type="button" class="btn btn--prueba" id="btnPrueba" style="flex:0 0 auto;background:#F5F3FF;color:#5B21B6;border:1.5px solid #C4B5FD;
+                 font-size:14px;min-height:48px;padding:12px 16px;white-space:nowrap;">
+                        <svg class="btn--icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="12" y1="18" x2="12" y2="12" />
+                            <line x1="9" y1="15" x2="15" y2="15" />
+                        </svg>
+                        <div class="btn--spinner" style="border-color:rgba(91,33,182,.3);border-top-color:#5B21B6;">
+                        </div>
+                        Enviar prueba
+                    </button>
+                </div>
+                <div class="result" id="resultPrueba" style="margin-top:10px;"></div>
+            </div>
+
+            <hr class="divider" />
+            <button type="button" class="btn btn--primary" id="btnEnviar">
+                <svg class="btn--icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                </svg>
+                <div class="btn--spinner"></div>
+                Enviar figuritas
+            </button>
+            <button type="button" class="btn btn--danger" id="btnCancelar" style="display:none">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
+                </svg>
+                Cancelar
+            </button>
+        </div>
+
+        <!-- Resultado -->
+        <div class="result" id="result"></div>
+
+        <hr class="divider" />
+
+        <div class="info">
+            <strong>¿Qué hace este panel?</strong><br>
+            Envía un mail con la figurita adjunta a todos los participantes que tienen
+            una figurita generada. Los mails se procesan en lotes automáticamente.<br><br>
+            <strong>¿Qué pasa con los que ya recibieron el mail?</strong><br>
+            No se les vuelve a enviar — solo se procesan los que están en estado
+            "FIGURITA_CREADA". Si querés reenviar, usá la opción de reintentar errores.
+        </div>
+
+        </div>
+
+        <script>
+            const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbwb_blECxEBUJMKPtg1Oh82Zq3f-W1RBzpWKhOZaPq53uibZO55l4_CMMJMqu6irgvu/exec';
+
+            const statusBadge = document.getElementById('statusBadge');
+            const statusText = document.getElementById('statusText');
+            const statPendientes = document.getElementById('statPendientes');
+            const statEnviados = document.getElementById('statEnviados');
+            const statErrores = document.getElementById('statErrores');
+            const statCuota = document.getElementById('statCuota');
+            const progressSection = document.getElementById('progressSection');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const checkErrorBlock = document.getElementById('checkErrorBlock');
+            const checkErrores = document.getElementById('checkErrores');
+            const cantErrores = document.getElementById('cantErrores');
+            const btnEnviar = document.getElementById('btnEnviar');
+            const btnCancelar = document.getElementById('btnCancelar');
+            const result = document.getElementById('result');
+
+            let enProceso = false;
+            let totalTotal = 0;
+            let pollingTimer = null;
+
+            // ── CARGAR ESTADO ─────────────────────────────────────────
+            async function checkEstado() {
+                try {
+                    const r = await fetch(`${BACKEND_URL}?action=mail_status`);
+                    const data = await r.json();
+                    actualizarStats(data);
+                    return data;
+                } catch (_) {
+                    statusBadge.className = 'status-badge unknown';
+                    statusText.textContent = 'No se pudo verificar';
+                    return null;
+                }
+            }
+
+            function actualizarStats(data) {
+                if (!data || data.status !== 'ok') return;
+
+                enProceso = data.enProceso;
+                totalTotal = data.enviados + data.pendientes + data.errorEmail + data.sinFigurita;
+
+                statPendientes.textContent = data.pendientes;
+                statEnviados.textContent = data.enviados;
+                statErrores.textContent = data.errorEmail;
+                statCuota.textContent = data.cuota;
+
+                // Badge de estado
+                if (data.enProceso) {
+                    statusBadge.className = 'status-badge running';
+                    statusText.textContent = '⏳ Enviando mails…';
+                    btnEnviar.style.display = 'none';
+                    btnCancelar.style.display = 'flex';
+                    progressSection.classList.add('visible');
+                } else if (data.pendientes === 0 && data.enviados > 0) {
+                    statusBadge.className = 'status-badge done';
+                    statusText.textContent = `✅ Todos enviados (${data.enviados})`;
+                    btnEnviar.disabled = true;
+                    btnCancelar.style.display = 'none';
+                    btnEnviar.style.display = 'flex';
+                    progressSection.classList.remove('visible');
+                } else {
+                    statusBadge.className = 'status-badge idle';
+                    statusText.textContent = data.pendientes > 0
+                        ? `📨 ${data.pendientes} mail${data.pendientes > 1 ? 's' : ''} pendiente${data.pendientes > 1 ? 's' : ''}`
+                        : '✅ Sin pendientes';
+                    btnEnviar.disabled = data.pendientes === 0 && data.errorEmail === 0;
+                    btnCancelar.style.display = 'none';
+                    btnEnviar.style.display = 'flex';
+                    progressSection.classList.remove('visible');
+                }
+
+                // Checkbox de errores
+                if (data.errorEmail > 0 && !data.enProceso) {
+                    cantErrores.textContent = data.errorEmail;
+                    checkErrorBlock.style.display = 'flex';
+                } else {
+                    checkErrorBlock.style.display = 'none';
+                }
+
+                // Barra de progreso
+                const enviados = data.enviados;
+                const total = enviados + data.pendientes;
+                if (total > 0) {
+                    const pct = Math.round((enviados / total) * 100);
+                    progressFill.style.width = pct + '%';
+                    progressText.textContent = `${enviados} / ${total}`;
+                }
+            }
+
+            // ── PRUEBA ────────────────────────────────────────────────
+            const mailPruebaEl = document.getElementById('mailPrueba');
+            const btnPrueba = document.getElementById('btnPrueba');
+            const resultPrueba = document.getElementById('resultPrueba');
+
+            btnPrueba.addEventListener('click', async () => {
+                const mail = mailPruebaEl.value.trim();
+                resultPrueba.className = 'result';
+
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) {
+                    resultPrueba.className = 'result error visible';
+                    resultPrueba.innerHTML = '<strong>❌ Mail inválido</strong>Ingresá una dirección de mail válida.';
+                    return;
+                }
+
+                btnPrueba.classList.add('loading');
+                btnPrueba.disabled = true;
+
+                try {
+                    const r = await fetch(`${BACKEND_URL}?action=mail_prueba&mail=${encodeURIComponent(mail)}`);
+                    const data = await r.json();
+
+                    if (data.status === 'ok') {
+                        resultPrueba.className = 'result ok visible';
+                        resultPrueba.innerHTML = `<strong>✅ Prueba enviada</strong>${data.message}`;
+                    } else {
+                        throw new Error(data.message || 'Error desconocido');
+                    }
+                } catch (err) {
+                    resultPrueba.className = 'result error visible';
+                    resultPrueba.innerHTML = `<strong>❌ Error</strong>${err.message}`;
+                } finally {
+                    btnPrueba.classList.remove('loading');
+                    btnPrueba.disabled = false;
+                }
+            });
+
+            // ── ENVIAR ────────────────────────────────────────────────
+            btnEnviar.addEventListener('click', async () => {
+                result.className = 'result';
+                const incluirErr = checkErrores.checked;
+
+                btnEnviar.classList.add('loading');
+                btnEnviar.disabled = true;
+
+                try {
+                    const url = `${BACKEND_URL}?action=enviar_mails&incluir_errores=${incluirErr}`;
+                    const r = await fetch(url);
+                    const data = await r.json();
+
+                    if (data.status === 'ok') {
+                        result.className = 'result ok visible';
+                        result.innerHTML = `<strong>✅ Enviando</strong>${data.message}`;
+                        enProceso = true;
+                        iniciarPolling();
+                        await checkEstado();
+                    } else {
+                        throw new Error(data.message || 'Error desconocido');
+                    }
+                } catch (err) {
+                    result.className = 'result error visible';
+                    result.innerHTML = `<strong>❌ Error</strong>${err.message}`;
+                    btnEnviar.disabled = false;
+                } finally {
+                    btnEnviar.classList.remove('loading');
+                }
+            });
+
+            // ── CANCELAR ──────────────────────────────────────────────
+            btnCancelar.addEventListener('click', async () => {
+                if (!confirm('¿Cancelar el envío en curso?')) return;
+                try {
+                    await fetch(`${BACKEND_URL}?action=cancelar_mails`);
+                    detenerPolling();
+                    await checkEstado();
+                    result.className = 'result ok visible';
+                    result.innerHTML = '<strong>⏹ Envío cancelado</strong>El proceso se detuvo. Los mails ya enviados no se cancelan.';
+                } catch (_) { }
+            });
+
+            // ── POLLING ───────────────────────────────────────────────
+            function iniciarPolling() {
+                if (pollingTimer) return;
+                pollingTimer = setInterval(async () => {
+                    const data = await checkEstado();
+                    if (data && !data.enProceso) detenerPolling();
+                }, 8000); // cada 8 segundos mientras envía
+            }
+
+            function detenerPolling() {
+                if (pollingTimer) { clearInterval(pollingTimer); pollingTimer = null; }
+            }
+
+            // ── INIT ──────────────────────────────────────────────────
+            checkEstado().then(data => {
+                if (data && data.enProceso) iniciarPolling();
+            });
+        </script>
+
+    </body>
+
+</html>
